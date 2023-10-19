@@ -5,63 +5,87 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { MatchResults } from "@stencil-community/router";
-export { MatchResults } from "@stencil-community/router";
 export namespace Components {
-    interface AppHome {
-    }
-    interface AppProfile {
-        "match": MatchResults;
-    }
     interface AppRoot {
+    }
+    interface AppTabs {
+    }
+    interface PageHome {
+    }
+    interface PageNotice {
+    }
+    interface PageProfile {
+        "name": string;
     }
 }
 declare global {
-    interface HTMLAppHomeElement extends Components.AppHome, HTMLStencilElement {
-    }
-    var HTMLAppHomeElement: {
-        prototype: HTMLAppHomeElement;
-        new (): HTMLAppHomeElement;
-    };
-    interface HTMLAppProfileElement extends Components.AppProfile, HTMLStencilElement {
-    }
-    var HTMLAppProfileElement: {
-        prototype: HTMLAppProfileElement;
-        new (): HTMLAppProfileElement;
-    };
     interface HTMLAppRootElement extends Components.AppRoot, HTMLStencilElement {
     }
     var HTMLAppRootElement: {
         prototype: HTMLAppRootElement;
         new (): HTMLAppRootElement;
     };
+    interface HTMLAppTabsElement extends Components.AppTabs, HTMLStencilElement {
+    }
+    var HTMLAppTabsElement: {
+        prototype: HTMLAppTabsElement;
+        new (): HTMLAppTabsElement;
+    };
+    interface HTMLPageHomeElement extends Components.PageHome, HTMLStencilElement {
+    }
+    var HTMLPageHomeElement: {
+        prototype: HTMLPageHomeElement;
+        new (): HTMLPageHomeElement;
+    };
+    interface HTMLPageNoticeElement extends Components.PageNotice, HTMLStencilElement {
+    }
+    var HTMLPageNoticeElement: {
+        prototype: HTMLPageNoticeElement;
+        new (): HTMLPageNoticeElement;
+    };
+    interface HTMLPageProfileElement extends Components.PageProfile, HTMLStencilElement {
+    }
+    var HTMLPageProfileElement: {
+        prototype: HTMLPageProfileElement;
+        new (): HTMLPageProfileElement;
+    };
     interface HTMLElementTagNameMap {
-        "app-home": HTMLAppHomeElement;
-        "app-profile": HTMLAppProfileElement;
         "app-root": HTMLAppRootElement;
+        "app-tabs": HTMLAppTabsElement;
+        "page-home": HTMLPageHomeElement;
+        "page-notice": HTMLPageNoticeElement;
+        "page-profile": HTMLPageProfileElement;
     }
 }
 declare namespace LocalJSX {
-    interface AppHome {
-    }
-    interface AppProfile {
-        "match"?: MatchResults;
-    }
     interface AppRoot {
     }
+    interface AppTabs {
+    }
+    interface PageHome {
+    }
+    interface PageNotice {
+    }
+    interface PageProfile {
+        "name"?: string;
+    }
     interface IntrinsicElements {
-        "app-home": AppHome;
-        "app-profile": AppProfile;
         "app-root": AppRoot;
+        "app-tabs": AppTabs;
+        "page-home": PageHome;
+        "page-notice": PageNotice;
+        "page-profile": PageProfile;
     }
 }
 export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
-            "app-home": LocalJSX.AppHome & JSXBase.HTMLAttributes<HTMLAppHomeElement>;
-            "app-profile": LocalJSX.AppProfile & JSXBase.HTMLAttributes<HTMLAppProfileElement>;
             "app-root": LocalJSX.AppRoot & JSXBase.HTMLAttributes<HTMLAppRootElement>;
+            "app-tabs": LocalJSX.AppTabs & JSXBase.HTMLAttributes<HTMLAppTabsElement>;
+            "page-home": LocalJSX.PageHome & JSXBase.HTMLAttributes<HTMLPageHomeElement>;
+            "page-notice": LocalJSX.PageNotice & JSXBase.HTMLAttributes<HTMLPageNoticeElement>;
+            "page-profile": LocalJSX.PageProfile & JSXBase.HTMLAttributes<HTMLPageProfileElement>;
         }
     }
 }
