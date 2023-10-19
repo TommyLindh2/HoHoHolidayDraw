@@ -12,7 +12,10 @@ export class AppTabs {
         <ion-tab tab="tab-home">
           <ion-nav></ion-nav>
         </ion-tab>
-        <ion-tab tab="tab-notice">
+        <ion-tab tab="tab-draw">
+          <ion-nav></ion-nav>
+        </ion-tab>
+        <ion-tab tab="tab-people">
           <ion-nav></ion-nav>
         </ion-tab>
         <ion-tab-bar slot="bottom">
@@ -20,10 +23,13 @@ export class AppTabs {
             <ion-icon name="home"></ion-icon>
             <ion-label>Home</ion-label>
           </ion-tab-button>
-          <ion-tab-button tab="tab-notice">
-            <ion-icon name="notifications"></ion-icon>
-            <ion-badge color="danger">12</ion-badge>
-            <ion-label>Notices</ion-label>
+          <ion-tab-button tab="tab-draw">
+            <ion-icon name="shuffle-outline"></ion-icon>
+            <ion-label>Draw</ion-label>
+          </ion-tab-button>
+          <ion-tab-button tab="tab-people">
+            <ion-icon name="people-outline"></ion-icon>
+            <ion-label>People</ion-label>
           </ion-tab-button>
         </ion-tab-bar>
       </ion-tabs>

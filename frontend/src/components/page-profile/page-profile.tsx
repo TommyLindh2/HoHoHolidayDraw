@@ -1,40 +1,85 @@
-import { Component, Fragment, h, Prop } from '@stencil/core';
+import { Component, Fragment, h, Prop, State } from '@stencil/core';
+import * as models from '../../models';
+import { BackendClient } from '../../services/backendClient';
+import { DEFAULT_PROFILE_PICTURE } from '../../config';
 
 @Component({
   tag: 'page-profile',
   styleUrl: 'page-profile.scss',
-  // shadow: true,
+  shadow: true,
 })
 export class PageProfile {
-  @Prop() name: string;
+  @Prop() peopleId: number;
+  @State() isLoading: boolean = true;
+  @State() people: models.People = null;
 
-  normalize(name: string): string {
-    name = name || '';
-    return name.slice(0, 1).toUpperCase() + name.slice(1).toLowerCase();
+  private get client(): BackendClient {
+    return BackendClient.GetInstance();
   }
 
-  render() {
+  public async componentDidLoad() {
+    this.people = await this.client.GetPeopleById(this.peopleId).finally(() => (this.isLoading = false));
+  }
+
+  public render() {
     return (
       <Fragment>
-        <ion-header>
-          <ion-toolbar color="primary">
-            <ion-buttons slot="start">
-              <ion-back-button defaultHref="/tab/notice"></ion-back-button>
-            </ion-buttons>
-            <ion-title>Profile: {this.name}</ion-title>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content fullscreen class="ion-padding">
-          <ion-card>
-            <ion-card-header>
-              <h1>{this.normalize(this.name)}</h1>
-            </ion-card-header>
-            <ion-card-content>
-              <p>This name is passed in through a route param!</p>
-            </ion-card-content>
-          </ion-card>
-        </ion-content>
+        {this.renderHeader()}
+        {this.renderContent()}
+        {this.renderLoader()}
       </Fragment>
     );
   }
+
+  private renderContent = () => {
+    if (this.isLoading) {
+      return;
+    }
+
+    return (
+      <ion-content fullscreen class="ion-padding">
+        <ion-card>
+          <ion-card-header>
+            {this.renderPicture()}
+            <h1>{this.people?.name}</h1>
+          </ion-card-header>
+
+          <ion-card-content>
+            <p>A little profile here</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    );
+  };
+
+  private renderPicture = () => {
+    const pictureUrl = this.people?.pictureUrl || DEFAULT_PROFILE_PICTURE;
+
+    return (
+      <ion-avatar>
+        <img alt={`Profile picture of ${this.people?.name}`} src={pictureUrl} />
+      </ion-avatar>
+    );
+  };
+
+  private renderHeader = () => {
+    return (
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tab/people"></ion-back-button>
+          </ion-buttons>
+          <ion-title>Profile: {this.people?.name ?? ''}</ion-title>
+        </ion-toolbar>
+      </ion-header>
+    );
+  };
+
+  private renderLoader = () => {
+    if (!this.isLoading) {
+      return;
+    }
+
+    return <ion-skeleton-text animated />;
+  };
 }

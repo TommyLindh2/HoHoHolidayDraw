@@ -10,12 +10,14 @@ export namespace Components {
     }
     interface AppTabs {
     }
+    interface PageDraw {
+    }
     interface PageHome {
     }
-    interface PageNotice {
+    interface PagePeopleList {
     }
     interface PageProfile {
-        "name": string;
+        "peopleId": number;
     }
 }
 declare global {
@@ -31,17 +33,23 @@ declare global {
         prototype: HTMLAppTabsElement;
         new (): HTMLAppTabsElement;
     };
+    interface HTMLPageDrawElement extends Components.PageDraw, HTMLStencilElement {
+    }
+    var HTMLPageDrawElement: {
+        prototype: HTMLPageDrawElement;
+        new (): HTMLPageDrawElement;
+    };
     interface HTMLPageHomeElement extends Components.PageHome, HTMLStencilElement {
     }
     var HTMLPageHomeElement: {
         prototype: HTMLPageHomeElement;
         new (): HTMLPageHomeElement;
     };
-    interface HTMLPageNoticeElement extends Components.PageNotice, HTMLStencilElement {
+    interface HTMLPagePeopleListElement extends Components.PagePeopleList, HTMLStencilElement {
     }
-    var HTMLPageNoticeElement: {
-        prototype: HTMLPageNoticeElement;
-        new (): HTMLPageNoticeElement;
+    var HTMLPagePeopleListElement: {
+        prototype: HTMLPagePeopleListElement;
+        new (): HTMLPagePeopleListElement;
     };
     interface HTMLPageProfileElement extends Components.PageProfile, HTMLStencilElement {
     }
@@ -52,8 +60,9 @@ declare global {
     interface HTMLElementTagNameMap {
         "app-root": HTMLAppRootElement;
         "app-tabs": HTMLAppTabsElement;
+        "page-draw": HTMLPageDrawElement;
         "page-home": HTMLPageHomeElement;
-        "page-notice": HTMLPageNoticeElement;
+        "page-people-list": HTMLPagePeopleListElement;
         "page-profile": HTMLPageProfileElement;
     }
 }
@@ -62,18 +71,21 @@ declare namespace LocalJSX {
     }
     interface AppTabs {
     }
+    interface PageDraw {
+    }
     interface PageHome {
     }
-    interface PageNotice {
+    interface PagePeopleList {
     }
     interface PageProfile {
-        "name"?: string;
+        "peopleId"?: number;
     }
     interface IntrinsicElements {
         "app-root": AppRoot;
         "app-tabs": AppTabs;
+        "page-draw": PageDraw;
         "page-home": PageHome;
-        "page-notice": PageNotice;
+        "page-people-list": PagePeopleList;
         "page-profile": PageProfile;
     }
 }
@@ -83,8 +95,9 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "app-root": LocalJSX.AppRoot & JSXBase.HTMLAttributes<HTMLAppRootElement>;
             "app-tabs": LocalJSX.AppTabs & JSXBase.HTMLAttributes<HTMLAppTabsElement>;
+            "page-draw": LocalJSX.PageDraw & JSXBase.HTMLAttributes<HTMLPageDrawElement>;
             "page-home": LocalJSX.PageHome & JSXBase.HTMLAttributes<HTMLPageHomeElement>;
-            "page-notice": LocalJSX.PageNotice & JSXBase.HTMLAttributes<HTMLPageNoticeElement>;
+            "page-people-list": LocalJSX.PagePeopleList & JSXBase.HTMLAttributes<HTMLPagePeopleListElement>;
             "page-profile": LocalJSX.PageProfile & JSXBase.HTMLAttributes<HTMLPageProfileElement>;
         }
     }

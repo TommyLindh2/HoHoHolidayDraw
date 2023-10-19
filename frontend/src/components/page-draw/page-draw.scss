@@ -1,0 +1,19 @@
+ion-avatar {
+  margin-right: 1rem;
+}
+
+ion-grid {
+  max-width: 50rem;
+}
+
+.people {
+  --animation-length: var(--animation-length, 0.5s);
+
+  -webkit-transition: transform var(--animation-length) ease-in-out;
+  transition: transform var(--animation-length) ease-in-out;
+}
+
+.person-list {
+  display: flex;
+  flex-direction: column;
+}
