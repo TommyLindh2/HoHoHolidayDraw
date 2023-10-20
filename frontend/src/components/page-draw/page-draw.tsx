@@ -1,4 +1,14 @@
-import { Component, Fragment, h, State } from '@stencil/core';
+/**
+ * FRONTEND:
+ *  TODO: Shuffle should stop 1 row, and then next row and next, so everyting don't stop at the same time
+ *  TODO: List available groups and select to go to the draw view with selected group
+ *  TODO: Be able to add/update/delete groups, persons and belongings
+ *
+ * BACKEND:
+ *  TODO: Add delete endpoints
+ *  TODO: Implement database storage
+ */
+import { Component, Fragment, h, State, Prop } from '@stencil/core';
 import { BackendClient } from '../../services/backendClient';
 import * as models from '../../models';
 import { DEFAULT_PROFILE_PICTURE } from '../../config';
@@ -13,6 +23,9 @@ const ITEM_HEIGHT = 44;
 })
 export class PageDraw {
   private persons: models.Person[] = [];
+
+  @Prop()
+  public groupId: number = 20;
 
   @State()
   private leftSide: number[] = [];
@@ -32,12 +45,19 @@ export class PageDraw {
   @State()
   private transitionTimeoutHandles: NodeJS.Timeout[] = [];
 
+  @State()
+  private group: models.Group;
+
   private get client(): BackendClient {
     return BackendClient.GetInstance();
   }
 
   public async componentDidLoad() {
-    this.persons = await this.client.GetPersons().finally(() => (this.isLoading = false));
+    const [group, persons] = await Promise.all([this.client.GetGroupById(this.groupId), this.client.GetPersonByGroupId(this.groupId)]).finally(() => (this.isLoading = false));
+
+    this.group = group;
+    this.persons = persons;
+
     this.rightSide = this.persons.map(p => p.id);
     this.leftSide = this.persons.map(p => p.id);
   }
@@ -47,7 +67,12 @@ export class PageDraw {
       <Fragment>
         <ion-header>
           <ion-toolbar color="primary">
-            <ion-title>Draw</ion-title>
+            <ion-title>
+              <div class="title">
+                <span>Draw</span>
+                {this.group ? [<span>-</span>, <span>{this.group.name}</span>] : <ion-skeleton-text animated />}
+              </div>
+            </ion-title>
           </ion-toolbar>
         </ion-header>
         <ion-content class="ion-padding">

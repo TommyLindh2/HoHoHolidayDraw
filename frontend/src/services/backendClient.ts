@@ -35,4 +35,31 @@ export class BackendClient extends HttpClient {
 
     return response.json();
   };
+
+  public GetGroups = async (): Promise<models.Group[]> => {
+    const response = await this.PerformRequest('GET', `api/group`);
+    if (!response.ok) {
+      throw new errors.ResponseError(response);
+    }
+
+    return response.json().then(resp => resp.groups);
+  };
+
+  public GetGroupById = async (id: number): Promise<models.Group> => {
+    const response = await this.PerformRequest('GET', `api/group/${id}`);
+    if (!response.ok) {
+      throw new errors.ResponseError(response);
+    }
+
+    return response.json();
+  };
+
+  public GetPersonByGroupId = async (groupId: number): Promise<models.Person[]> => {
+    const response = await this.PerformRequest('GET', `api/group/${groupId}/person`);
+    if (!response.ok) {
+      throw new errors.ResponseError(response);
+    }
+
+    return response.json().then(resp => resp.persons);
+  };
 }

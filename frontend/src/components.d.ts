@@ -11,10 +11,9 @@ export namespace Components {
     interface AppTabs {
     }
     interface PageDraw {
+        "groupId": number;
     }
     interface PageHome {
-    }
-    interface PagePersoList {
     }
     interface PagePersonList {
     }
@@ -47,12 +46,6 @@ declare global {
         prototype: HTMLPageHomeElement;
         new (): HTMLPageHomeElement;
     };
-    interface HTMLPagePersoListElement extends Components.PagePersoList, HTMLStencilElement {
-    }
-    var HTMLPagePersoListElement: {
-        prototype: HTMLPagePersoListElement;
-        new (): HTMLPagePersoListElement;
-    };
     interface HTMLPagePersonListElement extends Components.PagePersonList, HTMLStencilElement {
     }
     var HTMLPagePersonListElement: {
@@ -70,7 +63,6 @@ declare global {
         "app-tabs": HTMLAppTabsElement;
         "page-draw": HTMLPageDrawElement;
         "page-home": HTMLPageHomeElement;
-        "page-perso-list": HTMLPagePersoListElement;
         "page-person-list": HTMLPagePersonListElement;
         "page-profile": HTMLPageProfileElement;
     }
@@ -81,10 +73,9 @@ declare namespace LocalJSX {
     interface AppTabs {
     }
     interface PageDraw {
+        "groupId"?: number;
     }
     interface PageHome {
-    }
-    interface PagePersoList {
     }
     interface PagePersonList {
     }
@@ -96,7 +87,6 @@ declare namespace LocalJSX {
         "app-tabs": AppTabs;
         "page-draw": PageDraw;
         "page-home": PageHome;
-        "page-perso-list": PagePersoList;
         "page-person-list": PagePersonList;
         "page-profile": PageProfile;
     }
@@ -109,7 +99,6 @@ declare module "@stencil/core" {
             "app-tabs": LocalJSX.AppTabs & JSXBase.HTMLAttributes<HTMLAppTabsElement>;
             "page-draw": LocalJSX.PageDraw & JSXBase.HTMLAttributes<HTMLPageDrawElement>;
             "page-home": LocalJSX.PageHome & JSXBase.HTMLAttributes<HTMLPageHomeElement>;
-            "page-perso-list": LocalJSX.PagePersoList & JSXBase.HTMLAttributes<HTMLPagePersoListElement>;
             "page-person-list": LocalJSX.PagePersonList & JSXBase.HTMLAttributes<HTMLPagePersonListElement>;
             "page-profile": LocalJSX.PageProfile & JSXBase.HTMLAttributes<HTMLPageProfileElement>;
         }

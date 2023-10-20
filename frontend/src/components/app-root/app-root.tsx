@@ -23,6 +23,7 @@ export class AppRoot {
             </ion-route>
           </ion-route>
           <ion-route url="/profile/:personId" component="page-profile"></ion-route>
+          <ion-route url="/draw/:groupId" component="page-draw"></ion-route>
         </ion-router>
         <ion-nav></ion-nav>
       </ion-app>

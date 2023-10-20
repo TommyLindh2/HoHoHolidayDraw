@@ -2,6 +2,19 @@ ion-avatar {
   margin-right: 1rem;
 }
 
+.title {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
+
+  ion-skeleton-text {
+    max-width: 10rem;
+    --background: rgba(255, 255, 255, 0.765);
+    --background-rgb: 255, 255, 255;
+  }
+}
+
 .content {
   max-width: 55rem;
   margin: auto;
