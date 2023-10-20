@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
-import * as models from "./models";
+import { DbStorage, MemoryStorage, InitializeDefaultPersons } from "./storage";
+import * as errors from "./errors";
 import cors from "cors";
 
 const app = express();
@@ -8,30 +9,14 @@ const port = process.env.PORT || 3000;
 // Enable CORS for all routes
 app.use(cors());
 
-const persons: models.Person[] = [
-    {
-        id: 1,
-        name: "Tommy Hallman Lindh",
-        pictureUrl:
-            "https://scontent-arn2-1.xx.fbcdn.net/v/t1.6435-1/35236973_10156021233264219_957563946485678080_n.jpg?stp=dst-jpg_p200x200&_nc_cat=100&ccb=1-7&_nc_sid=2b6aad&_nc_ohc=QjHnJrYF3fkAX95W31c&_nc_ht=scontent-arn2-1.xx&oh=00_AfBBsnVv4x8dq0EaYc8qjXD5Cl5wc6G9jPMsGQkuwuoLmA&oe=6558CE5B",
-    },
-    {
-        id: 2,
-        name: "Sanna Hallman Lindh",
-        pictureUrl:
-            "https://scontent-arn2-1.xx.fbcdn.net/v/t1.6435-1/99013543_10217207605089601_5995178680496685056_n.jpg?stp=dst-jpg_p200x200&_nc_cat=108&ccb=1-7&_nc_sid=2b6aad&_nc_ohc=YiH3tAk9vE4AX9Yh6Vm&_nc_ht=scontent-arn2-1.xx&oh=00_AfBrz2-iTnzoXg0d5BxhBc40tZ9OSDRzno4Ezfeppz1lSQ&oe=6558FB06",
-    },
-    {
-        id: 3,
-        name: "David Lundgren",
-    },
-];
-
 app.use(express.json());
+
+const storage: DbStorage = new MemoryStorage();
+InitializeDefaultPersons(storage);
 
 app.get("/api/person", (req: Request, res: Response) => {
     return res.json({
-        persons: persons,
+        persons: storage.GetPersons(),
     });
 });
 
@@ -44,7 +29,7 @@ app.get("/api/person/:id", (req: Request, res: Response) => {
     }
     const personId = parseInt(req.params.id);
 
-    const person = persons.find((p) => p.id === personId);
+    const person = storage.GetPersonById(personId);
     if (!person) {
         return res.status(404).json({
             error: `Person with ID: ${personId} not found`,
@@ -52,6 +37,66 @@ app.get("/api/person/:id", (req: Request, res: Response) => {
     }
 
     return res.json(person);
+});
+
+app.get("/api/group", (req: Request, res: Response) => {
+    return res.json({
+        groups: storage.GetGroups(),
+    });
+});
+
+app.get("/api/group/:id", (req: Request, res: Response) => {
+    const requestedId = req.params.id;
+    if (isNaN(requestedId as any)) {
+        return res
+            .status(400)
+            .json({ error: "Invalid ID. ID must be a number." });
+    }
+    const groupId = parseInt(req.params.id);
+
+    const group = storage.GetGroupById(groupId);
+    if (!group) {
+        return res.status(404).json({
+            error: `Group with ID: ${groupId} not found`,
+        });
+    }
+
+    return res.json(group);
+});
+
+app.get("/api/group/:id/person", (req: Request, res: Response) => {
+    const requestedId = req.params.id;
+    if (isNaN(requestedId as any)) {
+        return res
+            .status(400)
+            .json({ error: "Invalid ID. ID must be a number." });
+    }
+    const groupId = parseInt(req.params.id);
+
+    const group = storage.GetGroupById(groupId);
+    if (!group) {
+        return res.status(404).json({
+            error: `Group with ID: ${groupId} not found`,
+        });
+    }
+
+    const persons = storage.GetPersonsByGroup(groupId);
+
+    return res.json({
+        persons: persons,
+    });
+});
+
+/**
+ * Error handling
+ */
+app.use((err: Error, req: Request, res: Response, next: any) => {
+    console.log(err.stack);
+    if (err instanceof errors.NotFoundError) {
+        res.status(404).json({ error: err.message });
+    }
+
+    res.status(500).json({ error: "An error occurred" });
 });
 
 app.listen(port, () => {
