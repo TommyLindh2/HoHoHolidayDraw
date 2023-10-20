@@ -2,11 +2,12 @@ ion-avatar {
   margin-right: 1rem;
 }
 
-ion-grid {
-  max-width: 50rem;
+.content {
+  max-width: 55rem;
+  margin: auto;
 }
 
-.people {
+.person {
   --animation-length: var(--animation-length, 0.5s);
 
   -webkit-transition: transform var(--animation-length) ease-in-out;
@@ -16,4 +17,15 @@ ion-grid {
 .person-list {
   display: flex;
   flex-direction: column;
+}
+
+.settings {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  & > * {
+    min-width: min(20rem, 100%);
+  }
 }

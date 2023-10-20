@@ -4,13 +4,13 @@ import * as models from '../../models';
 import { DEFAULT_PROFILE_PICTURE } from '../../config';
 
 @Component({
-  tag: 'page-people-list',
-  styleUrl: 'page-people-list.scss',
+  tag: 'page-person-list',
+  styleUrl: 'page-person-list.scss',
   // shadow: true,
 })
-export class PagePeopleList {
+export class PagePersonList {
   @State()
-  private peopleList: models.People[] = [];
+  private persons: models.Person[] = [];
 
   @State()
   private isLoading: boolean = true;
@@ -20,7 +20,7 @@ export class PagePeopleList {
   }
 
   public async componentDidLoad() {
-    this.peopleList = await this.client.GetPeople().finally(() => (this.isLoading = false));
+    this.persons = await this.client.GetPersons().finally(() => (this.isLoading = false));
   }
 
   public render() {
@@ -28,23 +28,23 @@ export class PagePeopleList {
       <Fragment>
         <ion-header>
           <ion-toolbar color="primary">
-            <ion-title>People</ion-title>
+            <ion-title>Persons</ion-title>
           </ion-toolbar>
         </ion-header>
         <ion-content class="ion-padding">
           {this.renderLoader()}
-          {this.renderPeopleList()}
+          {this.renderPersonList()}
         </ion-content>
       </Fragment>
     );
   }
 
-  private renderPeopleList = () => {
+  private renderPersonList = () => {
     if (this.isLoading) {
       return;
     }
 
-    return <ion-list>{this.peopleList.map(this.renderItem)}</ion-list>;
+    return <ion-list>{this.persons.map(this.renderItem)}</ion-list>;
   };
 
   private renderLoader = () => {
@@ -55,15 +55,15 @@ export class PagePeopleList {
     return <ion-spinner name="dots"></ion-spinner>;
   };
 
-  private renderItem = (people: models.People) => {
-    const pictureUrl = people?.pictureUrl || DEFAULT_PROFILE_PICTURE;
+  private renderItem = (person: models.Person) => {
+    const pictureUrl = person?.pictureUrl || DEFAULT_PROFILE_PICTURE;
 
     return (
-      <ion-item href={`/profile/${people.id}`} key={people.name}>
+      <ion-item href={`/profile/${person.id}`} key={person.name}>
         <ion-avatar>
-          <img alt={`Profile picture of ${people?.name}`} src={pictureUrl} />
+          <img alt={`Profile picture of ${person?.name}`} src={pictureUrl} />
         </ion-avatar>
-        <ion-label>{people.name}</ion-label>
+        <ion-label>{person.name}</ion-label>
       </ion-item>
     );
   };

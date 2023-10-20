@@ -15,7 +15,7 @@ export class AppTabs {
         <ion-tab tab="tab-draw">
           <ion-nav></ion-nav>
         </ion-tab>
-        <ion-tab tab="tab-people">
+        <ion-tab tab="tab-person">
           <ion-nav></ion-nav>
         </ion-tab>
         <ion-tab-bar slot="bottom">
@@ -27,9 +27,9 @@ export class AppTabs {
             <ion-icon name="shuffle-outline"></ion-icon>
             <ion-label>Draw</ion-label>
           </ion-tab-button>
-          <ion-tab-button tab="tab-people">
+          <ion-tab-button tab="tab-person">
             <ion-icon name="people-outline"></ion-icon>
-            <ion-label>People</ion-label>
+            <ion-label>Person</ion-label>
           </ion-tab-button>
         </ion-tab-bar>
       </ion-tabs>

@@ -9,16 +9,16 @@ import { DEFAULT_PROFILE_PICTURE } from '../../config';
   shadow: true,
 })
 export class PageProfile {
-  @Prop() peopleId: number;
+  @Prop() personId: number;
   @State() isLoading: boolean = true;
-  @State() people: models.People = null;
+  @State() person: models.Person = null;
 
   private get client(): BackendClient {
     return BackendClient.GetInstance();
   }
 
   public async componentDidLoad() {
-    this.people = await this.client.GetPeopleById(this.peopleId).finally(() => (this.isLoading = false));
+    this.person = await this.client.GetPersonById(this.personId).finally(() => (this.isLoading = false));
   }
 
   public render() {
@@ -41,7 +41,7 @@ export class PageProfile {
         <ion-card>
           <ion-card-header>
             {this.renderPicture()}
-            <h1>{this.people?.name}</h1>
+            <h1>{this.person?.name}</h1>
           </ion-card-header>
 
           <ion-card-content>
@@ -53,11 +53,11 @@ export class PageProfile {
   };
 
   private renderPicture = () => {
-    const pictureUrl = this.people?.pictureUrl || DEFAULT_PROFILE_PICTURE;
+    const pictureUrl = this.person?.pictureUrl || DEFAULT_PROFILE_PICTURE;
 
     return (
       <ion-avatar>
-        <img alt={`Profile picture of ${this.people?.name}`} src={pictureUrl} />
+        <img alt={`Profile picture of ${this.person?.name}`} src={pictureUrl} />
       </ion-avatar>
     );
   };
@@ -67,9 +67,9 @@ export class PageProfile {
       <ion-header>
         <ion-toolbar color="primary">
           <ion-buttons slot="start">
-            <ion-back-button defaultHref="/tab/people"></ion-back-button>
+            <ion-back-button defaultHref="/tab/person"></ion-back-button>
           </ion-buttons>
-          <ion-title>Profile: {this.people?.name ?? ''}</ion-title>
+          <ion-title>Profile: {this.person?.name ?? ''}</ion-title>
         </ion-toolbar>
       </ion-header>
     );

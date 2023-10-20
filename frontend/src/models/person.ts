@@ -1,4 +1,4 @@
-export interface People {
+export interface Person {
   id: number;
   name: string;
   pictureUrl: string;

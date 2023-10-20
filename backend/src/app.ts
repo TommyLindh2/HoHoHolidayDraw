@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 // Enable CORS for all routes
 app.use(cors());
 
-const peopleList: models.People[] = [
+const persons: models.Person[] = [
     {
         id: 1,
         name: "Tommy Hallman Lindh",
@@ -29,29 +29,29 @@ const peopleList: models.People[] = [
 
 app.use(express.json());
 
-app.get("/api/people", (req: Request, res: Response) => {
+app.get("/api/person", (req: Request, res: Response) => {
     return res.json({
-        people: peopleList,
+        persons: persons,
     });
 });
 
-app.get("/api/people/:id", (req: Request, res: Response) => {
+app.get("/api/person/:id", (req: Request, res: Response) => {
     const requestedId = req.params.id;
     if (isNaN(requestedId as any)) {
         return res
             .status(400)
             .json({ error: "Invalid ID. ID must be a number." });
     }
-    const peopleId = parseInt(req.params.id);
+    const personId = parseInt(req.params.id);
 
-    const people = peopleList.find((p) => p.id === peopleId);
-    if (!people) {
+    const person = persons.find((p) => p.id === personId);
+    if (!person) {
         return res.status(404).json({
-            error: `People with ID: ${peopleId} not found`,
+            error: `Person with ID: ${personId} not found`,
         });
     }
 
-    return res.json(people);
+    return res.json(person);
 });
 
 app.listen(port, () => {

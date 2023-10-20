@@ -18,17 +18,17 @@ export class BackendClient extends HttpClient {
     return BackendClient._instance;
   }
 
-  public GetPeople = async (): Promise<models.People[]> => {
-    const response = await this.PerformRequest('GET', 'api/people');
+  public GetPersons = async (): Promise<models.Person[]> => {
+    const response = await this.PerformRequest('GET', 'api/person');
     if (!response.ok) {
       throw new errors.ResponseError(response);
     }
 
-    return response.json().then(resp => resp.people);
+    return response.json().then(resp => resp.persons);
   };
 
-  public GetPeopleById = async (id: number): Promise<models.People> => {
-    const response = await this.PerformRequest('GET', `api/people/${id}`);
+  public GetPersonById = async (id: number): Promise<models.Person> => {
+    const response = await this.PerformRequest('GET', `api/person/${id}`);
     if (!response.ok) {
       throw new errors.ResponseError(response);
     }

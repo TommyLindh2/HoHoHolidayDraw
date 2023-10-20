@@ -12,7 +12,7 @@ const ITEM_HEIGHT = 44;
   // shadow: true,
 })
 export class PageDraw {
-  private peopleList: models.People[] = [];
+  private persons: models.Person[] = [];
 
   @State()
   private leftSide: number[] = [];
@@ -37,9 +37,9 @@ export class PageDraw {
   }
 
   public async componentDidLoad() {
-    this.peopleList = await this.client.GetPeople().finally(() => (this.isLoading = false));
-    this.rightSide = this.peopleList.map(p => p.id);
-    this.leftSide = this.peopleList.map(p => p.id);
+    this.persons = await this.client.GetPersons().finally(() => (this.isLoading = false));
+    this.rightSide = this.persons.map(p => p.id);
+    this.leftSide = this.persons.map(p => p.id);
   }
 
   public render() {
@@ -51,9 +51,11 @@ export class PageDraw {
           </ion-toolbar>
         </ion-header>
         <ion-content class="ion-padding">
-          {this.renderLoader()}
-          {this.renderPeopleDrawArea()}
-          {this.renderSettings()}
+          <div class="content">
+            {this.renderLoader()}
+            {this.renderPersonDrawArea()}
+            {this.renderSettings()}
+          </div>
         </ion-content>
       </Fragment>
     );
@@ -61,44 +63,49 @@ export class PageDraw {
 
   private renderSettings = () => {
     return (
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Settings</ion-card-title>
-          <ion-card-subtitle>Animation settings</ion-card-subtitle>
-        </ion-card-header>
-
-        <ion-card-content>
+      <container>
+        <h3>Settings</h3>
+        <container class="settings">
           <ion-range
             pin
             min="0"
             max="50"
+            ticks
+            step="1"
             value={this.animationCount}
             labelPlacement="stacked"
-            label={`Animation count (${this.animationCount} time(s))`}
+            label={`Animation count - ${this.animationCount} time(s)`}
             pinFormatter={(value: number) => {
               return `${value} time(s)`;
             }}
-            onIonChange={(event: RangeCustomEvent) => {
+            onIonInput={(event: RangeCustomEvent) => {
               this.animationCount = event.detail.value as number;
             }}
-          ></ion-range>
-
+          >
+            <ion-label slot="start">0</ion-label>
+            <ion-label slot="end">50</ion-label>
+          </ion-range>
           <ion-range
             min="0"
             max="1500"
+            ticks
+            step="50"
             pin
             value={this.animationLength}
             pinFormatter={(value: number) => {
               return `${value}ms`;
             }}
             labelPlacement="stacked"
-            label={`Animation length (${this.animationLength}s)`}
-            onIonChange={(event: RangeCustomEvent) => {
+            label={`Animation length - ${this.animationLength}s`}
+            onIonInput={(event: RangeCustomEvent) => {
               this.animationLength = event.detail.value as number;
             }}
-          ></ion-range>
-        </ion-card-content>
-      </ion-card>
+          >
+            <ion-icon slot="start" name="airplane-outline" />
+            <ion-icon slot="end" name="walk-outline" />
+          </ion-range>
+        </container>
+      </container>
     );
   };
 
@@ -110,78 +117,80 @@ export class PageDraw {
     return <ion-spinner name="dots"></ion-spinner>;
   };
 
-  private renderPeopleDrawArea = () => {
+  private renderPersonDrawArea = () => {
     if (this.isLoading) {
       return;
     }
 
     return (
-      <ion-grid>
-        <ion-row>
-          <ion-col size="6">{this.renderPeopleList(this.leftSide)}</ion-col>
-          <ion-col size="6">{this.renderPeopleList(this.rightSide)}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="6">
-            <ion-button shape="round" disabled={this.transitionTimeoutHandles.length > 0} onClick={this.shuffle} expand="block">
-              Shuffle
-            </ion-button>
-          </ion-col>
-          <ion-col size="6">
-            <ion-button shape="round" disabled={this.transitionTimeoutHandles.length === 0} onClick={this.clearTransitions} expand="block">
-              Stop Shuffle
-            </ion-button>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+      <container>
+        <h3>Drawing</h3>
+        <container class="drawing-area">
+          <ion-grid>
+            <ion-row>
+              <ion-col size="6">{this.renderPersonList(this.leftSide)}</ion-col>
+              <ion-col size="6">{this.renderPersonList(this.rightSide)}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6">
+                <ion-button shape="round" disabled={this.transitionTimeoutHandles.length > 0} onClick={this.startShuffle} expand="block">
+                  Shuffle
+                </ion-button>
+              </ion-col>
+              <ion-col size="6">
+                <ion-button shape="round" disabled={this.transitionTimeoutHandles.length === 0} onClick={this.clearTransitions} expand="block">
+                  Stop Shuffle
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </container>
+      </container>
     );
   };
 
-  private renderPeopleList = (peopleOrder: number[]) => {
+  private renderPersonList = (personOrder: number[]) => {
     return (
       <ion-list class="person-list">
-        {this.peopleList.map((people, index) =>
+        {this.persons.map((person, index) =>
           this.renderItem(
-            people,
+            person,
             index,
-            this.peopleList.findIndex(p => p.id === peopleOrder[index]),
+            this.persons.findIndex(p => p.id === personOrder[index]),
           ),
         )}
       </ion-list>
     );
   };
 
-  private shuffle = async () => {
-    const animationLength = this.animationLength;
-    const loopLength = animationLength ? this.animationCount : 1;
+  private shuffleWithoutGivingToOneself = () => {
+    return new Promise<void>(resolve => {
+      this.transitionTimeoutHandles.push(
+        setTimeout(() => {
+          let shuffledLeftPersons;
+          let shuffledRightPersons;
 
+          do {
+            // Shuffle the order of leftPersons and rightPersons separately
+            shuffledLeftPersons = this.shuffleArray(this.leftSide);
+            shuffledRightPersons = this.shuffleArray(this.rightSide);
+          } while (this.hasSamePersonAtSameIndex(shuffledLeftPersons, shuffledRightPersons));
+
+          this.leftSide = shuffledLeftPersons;
+          this.rightSide = shuffledRightPersons;
+
+          resolve();
+        }, this.animationLength),
+      );
+    });
+  };
+
+  private startShuffle = async () => {
     this.clearTransitions();
 
-    await new Promise<void>(resolve => {
-      for (let i = 0; i < loopLength; i++) {
-        this.transitionTimeoutHandles.push(
-          setTimeout(() => {
-            let shuffledLeftPersons;
-            let shuffledRightPersons;
-
-            do {
-              // Shuffle the order of leftPersons and rightPersons separately
-              shuffledLeftPersons = this.shuffleArray(this.leftSide);
-              shuffledRightPersons = this.shuffleArray(this.rightSide);
-            } while (this.hasSamePersonAtSameIndex(shuffledLeftPersons, shuffledRightPersons));
-
-            this.leftSide = shuffledLeftPersons;
-            this.rightSide = shuffledRightPersons;
-
-            if (i === loopLength - 1) {
-              setTimeout(() => {
-                resolve();
-              }, animationLength);
-            }
-          }, i * animationLength),
-        );
-      }
-    });
+    for (let i = 0; i < Math.max(1, this.animationCount); i++) {
+      await this.shuffleWithoutGivingToOneself();
+    }
 
     this.clearTransitions();
   };
@@ -213,8 +222,8 @@ export class PageDraw {
     return [...array];
   };
 
-  private renderItem = (people: models.People, originalIndex: number, orderIndex: number) => {
-    const pictureUrl = people?.pictureUrl || DEFAULT_PROFILE_PICTURE;
+  private renderItem = (person: models.Person, originalIndex: number, orderIndex: number) => {
+    const pictureUrl = person?.pictureUrl || DEFAULT_PROFILE_PICTURE;
 
     const diff = orderIndex - originalIndex;
 
@@ -222,16 +231,16 @@ export class PageDraw {
 
     return (
       <ion-item
-        class="people"
+        class="person"
         style={{
           '--animation-length': cssAnimationLength,
           'transform': `translateY(${diff * ITEM_HEIGHT}px)`,
         }}
       >
         <ion-avatar>
-          <img alt={`Profile picture of ${people?.name}`} src={pictureUrl} />
+          <img alt={`Profile picture of ${person?.name}`} src={pictureUrl} />
         </ion-avatar>
-        <ion-label>{people.name}</ion-label>
+        <ion-label>{person.name}</ion-label>
       </ion-item>
     );
   };
