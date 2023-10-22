@@ -1,7 +1,6 @@
 /**
  * FRONTEND:
  *  TODO: Shuffle should stop 1 row, and then next row and next, so everyting don't stop at the same time
- *  TODO: List available groups and select to go to the draw view with selected group
  *  TODO: Be able to add/update/delete groups, persons and belongings
  *  TODO: Prevent endless loops if last shuffle is the same person.
  *
@@ -26,7 +25,7 @@ export class PageDraw {
   private persons: models.Person[] = [];
 
   @Prop()
-  public groupId: number = 20;
+  public groupId: number;
 
   @State()
   private leftSide: number[] = [];
@@ -66,16 +65,7 @@ export class PageDraw {
   public render() {
     return (
       <Fragment>
-        <ion-header>
-          <ion-toolbar color="primary">
-            <ion-title>
-              <div class="title">
-                <span>Draw</span>
-                {this.group ? [<span>-</span>, <span>{this.group.name}</span>] : <ion-skeleton-text animated />}
-              </div>
-            </ion-title>
-          </ion-toolbar>
-        </ion-header>
+        {this.renderHeader()}
         <ion-content class="ion-padding">
           <div class="content">
             {this.renderLoader()}
@@ -227,6 +217,24 @@ export class PageDraw {
     }
     this.transitionTimeoutHandles = [];
   };
+
+  private renderHeader() {
+    return (
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tab/draw"></ion-back-button>
+          </ion-buttons>
+          <ion-title>
+            <div class="title">
+              <span>Draw</span>
+              {this.group ? [<span>-</span>, <span>{this.group.name}</span>] : <ion-skeleton-text animated />}
+            </div>
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
+    );
+  }
 
   private hasSamePersonAtSameIndex(arr1: any[], arr2: any[]) {
     // Helper function to check if the same person appears at the same index in both lists
