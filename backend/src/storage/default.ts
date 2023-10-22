@@ -101,74 +101,68 @@ export function InitializeDefaultPersons(storage: DbStorage) {
         persons[i] = storage.CreatePerson(persons[i]);
     }
 
-    const groups: Partial<models.Group>[] = [
+    const groups: Array<Partial<models.Group> & { persons?: string[] }> = [
         {
             name: "Hemma hos Tommys familj",
+            persons: [
+                "Tommy",
+                "Sanna HL",
+                "Tina",
+                "Annie",
+                "Lena",
+                "Anders",
+                "Tobias",
+                "P-O",
+                "Anna-Lena",
+            ],
         },
         {
             name: "Hemma hos Sannas familj (förmiddag & Kväll)",
+            persons: [
+                "Tommy",
+                "Sanna HL",
+                "Göran",
+                "Jenny",
+                "Katrin",
+                "Stefan",
+                "David",
+                "Sanna K",
+                "William",
+                "Isac",
+            ],
         },
         {
             name: "Hemma hos Sannas familj (kväll)",
+            persons: [
+                "Tommy",
+                "Sanna HL",
+                "Göran",
+                "Jenny",
+                "Katrin",
+                "Stefan",
+                "David",
+                "Sanna K",
+                "William",
+                "Isac",
+                "Ingrid",
+                "Rune",
+            ],
         },
     ];
 
     for (let i = 0; i < groups.length; i++) {
-        groups[i] = storage.CreateGroup(groups[i]);
+        const group = groups[i];
+        const groupBelongings = group?.persons ?? [];
+        delete group.persons;
+
+        const createdGroup = storage.CreateGroup(group);
+        groups[i] = createdGroup;
+
+        storage.AddPersonsToGroup(
+            createdGroup.id,
+            groupBelongings.map(
+                (name) => persons.find((p) => p.name == name)?.id ?? -1
+            )
+        );
     }
-
-    const groupBelongings = new Map<number, number[]>();
-
-    groupBelongings.set(
-        groups[0].id as number,
-        [
-            "Tommy",
-            "Sanna HL",
-            "Tina",
-            "Annie",
-            "Lena",
-            "Anders",
-            "Tobias",
-            "P-O",
-            "Anna-Lena",
-        ].map((name) => persons.find((p) => p.name == name)?.id ?? -1)
-    );
-
-    groupBelongings.set(
-        groups[1].id as number,
-        [
-            "Tommy",
-            "Sanna HL",
-            "Göran",
-            "Jenny",
-            "Katrin",
-            "Stefan",
-            "David",
-            "Sanna K",
-            "William",
-            "Isac",
-        ].map((name) => persons.find((p) => p.name == name)?.id ?? -1)
-    );
-
-    groupBelongings.set(
-        groups[1].id as number,
-        [
-            "Tommy",
-            "Sanna HL",
-            "Göran",
-            "Jenny",
-            "Katrin",
-            "Stefan",
-            "David",
-            "Sanna K",
-            "William",
-            "Isac",
-            "Ingrid",
-            "Rune",
-        ].map((name) => persons.find((p) => p.name == name)?.id ?? -1)
-    );
-
-    groupBelongings.forEach((personIds, groupId) => {
-        storage.AddPersonsToGroup(groupId, personIds);
-    });
 }
