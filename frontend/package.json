@@ -21,6 +21,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@stencil/sass": "^3.0.6"
+    "@stencil/sass": "^3.0.6",
+    "let-it-go": "^1.0.0"
   }
 }

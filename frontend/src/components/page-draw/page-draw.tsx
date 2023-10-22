@@ -3,6 +3,7 @@
  *  TODO: Shuffle should stop 1 row, and then next row and next, so everyting don't stop at the same time
  *  TODO: List available groups and select to go to the draw view with selected group
  *  TODO: Be able to add/update/delete groups, persons and belongings
+ *  TODO: Prevent endless loops if last shuffle is the same person.
  *
  * BACKEND:
  *  TODO: Add delete endpoints
