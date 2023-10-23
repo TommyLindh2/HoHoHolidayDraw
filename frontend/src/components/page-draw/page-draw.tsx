@@ -1,8 +1,9 @@
 /**
  * FRONTEND:
- *  TODO: Shuffle should stop 1 row, and then next row and next, so everyting don't stop at the same time
- *  TODO: Be able to add/update/delete groups, persons and belongings
+ *  TODO: Rendering the drawing in pairs in a grid instead of just a list.
+ *  TODO: Be more clear the X gives to Y
  *  TODO: Prevent endless loops if last shuffle is the same person.
+ *  TODO: Be able to add/update/delete groups, persons and belongings
  *
  * BACKEND:
  *  TODO: Add delete endpoints
@@ -14,7 +15,7 @@ import * as models from '../../models';
 import { DEFAULT_PROFILE_PICTURE } from '../../config';
 import { RangeCustomEvent } from '@ionic/core';
 
-const ITEM_HEIGHT = 44;
+const ITEM_HEIGHT = 57;
 
 @Component({
   tag: 'page-draw',
@@ -58,8 +59,8 @@ export class PageDraw {
     this.group = group;
     this.persons = persons;
 
-    this.rightSide = this.persons.map(p => p.id);
     this.leftSide = this.persons.map(p => p.id);
+    this.rightSide = this.persons.map(p => p.id);
   }
 
   public render() {
@@ -77,6 +78,24 @@ export class PageDraw {
     );
   }
 
+  private renderHeader() {
+    return (
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tab/draw"></ion-back-button>
+          </ion-buttons>
+          <ion-title>
+            <div class="title">
+              <span>Draw</span>
+              {this.group ? [<span>-</span>, <span>{this.group.name}</span>] : <ion-skeleton-text animated />}
+            </div>
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
+    );
+  }
+
   private renderSettings = () => {
     return (
       <container>
@@ -84,7 +103,7 @@ export class PageDraw {
         <container class="settings">
           <ion-range
             pin
-            min="0"
+            min="1"
             max="50"
             ticks
             step="1"
@@ -92,13 +111,13 @@ export class PageDraw {
             labelPlacement="stacked"
             label={`Animation count - ${this.animationCount} time(s)`}
             pinFormatter={(value: number) => {
-              return `${value} time(s)`;
+              return `${value}`;
             }}
             onIonInput={(event: RangeCustomEvent) => {
               this.animationCount = event.detail.value as number;
             }}
           >
-            <ion-label slot="start">0</ion-label>
+            <ion-label slot="start">1</ion-label>
             <ion-label slot="end">50</ion-label>
           </ion-range>
           <ion-range
@@ -109,10 +128,10 @@ export class PageDraw {
             pin
             value={this.animationLength}
             pinFormatter={(value: number) => {
-              return `${value}ms`;
+              return `${value}`;
             }}
             labelPlacement="stacked"
-            label={`Animation length - ${this.animationLength}s`}
+            label={`Animation length - ${this.animationLength}ms`}
             onIonInput={(event: RangeCustomEvent) => {
               this.animationLength = event.detail.value as number;
             }}
@@ -168,92 +187,15 @@ export class PageDraw {
   private renderPersonList = (personOrder: number[]) => {
     return (
       <ion-list class="person-list">
-        {this.persons.map((person, index) =>
-          this.renderItem(
+        {this.persons.map((person, index) => {
+          return this.renderItem(
             person,
             index,
-            this.persons.findIndex(p => p.id === personOrder[index]),
-          ),
-        )}
+            personOrder.findIndex(personId => personId === person.id),
+          );
+        })}
       </ion-list>
     );
-  };
-
-  private shuffleWithoutGivingToOneself = () => {
-    return new Promise<void>(resolve => {
-      this.transitionTimeoutHandles.push(
-        setTimeout(() => {
-          let shuffledLeftPersons;
-          let shuffledRightPersons;
-
-          do {
-            // Shuffle the order of leftPersons and rightPersons separately
-            shuffledLeftPersons = this.shuffleArray(this.leftSide);
-            shuffledRightPersons = this.shuffleArray(this.rightSide);
-          } while (this.hasSamePersonAtSameIndex(shuffledLeftPersons, shuffledRightPersons));
-
-          this.leftSide = shuffledLeftPersons;
-          this.rightSide = shuffledRightPersons;
-
-          resolve();
-        }, this.animationLength),
-      );
-    });
-  };
-
-  private startShuffle = async () => {
-    this.clearTransitions();
-
-    for (let i = 0; i < Math.max(1, this.animationCount); i++) {
-      await this.shuffleWithoutGivingToOneself();
-    }
-
-    this.clearTransitions();
-  };
-
-  private clearTransitions = () => {
-    for (const timeoutHandle of this.transitionTimeoutHandles) {
-      clearTimeout(timeoutHandle);
-    }
-    this.transitionTimeoutHandles = [];
-  };
-
-  private renderHeader() {
-    return (
-      <ion-header>
-        <ion-toolbar color="primary">
-          <ion-buttons slot="start">
-            <ion-back-button defaultHref="/tab/draw"></ion-back-button>
-          </ion-buttons>
-          <ion-title>
-            <div class="title">
-              <span>Draw</span>
-              {this.group ? [<span>-</span>, <span>{this.group.name}</span>] : <ion-skeleton-text animated />}
-            </div>
-          </ion-title>
-        </ion-toolbar>
-      </ion-header>
-    );
-  }
-
-  private hasSamePersonAtSameIndex(arr1: any[], arr2: any[]) {
-    // Helper function to check if the same person appears at the same index in both lists
-    for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] === arr2[i]) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private shuffleArray = (array: any[]): any[] => {
-    // Randomly shuffle the array using Fisher-Yates algorithm
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-
-    return [...array];
   };
 
   private renderItem = (person: models.Person, originalIndex: number, orderIndex: number) => {
@@ -277,5 +219,69 @@ export class PageDraw {
         <ion-label>{person.name}</ion-label>
       </ion-item>
     );
+  };
+
+  private shuffleListsFromIndex = (shuffleFromIndex: number = 0) => {
+    return new Promise<void>(resolve => {
+      this.transitionTimeoutHandles.push(
+        setTimeout(
+          () => {
+            let shuffledLeftPersons;
+            let shuffledRightPersons;
+
+            do {
+              // Shuffle the order of leftPersons and rightPersons separately
+              shuffledLeftPersons = this.leftSide.slice(0, shuffleFromIndex).concat(this.shuffleArray(this.leftSide.slice(shuffleFromIndex)));
+              shuffledRightPersons = this.rightSide.slice(0, shuffleFromIndex).concat(this.shuffleArray(this.rightSide.slice(shuffleFromIndex)));
+            } while (this.hasSamePersonAtSameIndex(shuffledLeftPersons, shuffledRightPersons));
+
+            this.leftSide = shuffledLeftPersons;
+            this.rightSide = shuffledRightPersons;
+
+            resolve();
+          },
+          shuffleFromIndex >= this.persons.length - 1 ? 0 : this.animationLength,
+        ),
+      );
+    });
+  };
+
+  private startShuffle = async () => {
+    this.clearTransitions();
+
+    for (let personIndex = 0; personIndex < this.persons.length; personIndex++) {
+      for (let i = 0; i < Math.max(1, this.animationCount); i++) {
+        await this.shuffleListsFromIndex(personIndex);
+      }
+    }
+
+    this.clearTransitions();
+  };
+
+  private clearTransitions = () => {
+    for (const timeoutHandle of this.transitionTimeoutHandles) {
+      clearTimeout(timeoutHandle);
+    }
+    this.transitionTimeoutHandles = [];
+  };
+
+  private hasSamePersonAtSameIndex(arr1: any[], arr2: any[]) {
+    // Helper function to check if the same person appears at the same index in both lists
+    for (let i = 0; i < arr1.length; i++) {
+      if (arr1[i] === arr2[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private shuffleArray = (array: any[]): any[] => {
+    // Randomly shuffle the array using Fisher-Yates algorithm
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return [...array];
   };
 }
