@@ -1,7 +1,6 @@
 /**
  * FRONTEND:
  *  TODO: Rendering the drawing in pairs in a grid instead of just a list.
- *  TODO: Be more clear the X gives to Y
  *  TODO: Prevent endless loops if last shuffle is the same person.
  *  TODO: Be able to add/update/delete groups, persons and belongings
  *
@@ -14,8 +13,6 @@ import { BackendClient } from '../../services/backendClient';
 import * as models from '../../models';
 import { DEFAULT_PROFILE_PICTURE } from '../../config';
 import { RangeCustomEvent } from '@ionic/core';
-
-const ITEM_HEIGHT = 57;
 
 @Component({
     tag: 'page-draw',
@@ -35,10 +32,10 @@ export class PageDraw {
     private rightSide: number[] = [];
 
     @State()
-    private animationLength: number = 300;
+    private animationLength: number = 250;
 
     @State()
-    private animationCount: number = 10;
+    private animationCount: number = 5;
 
     @State()
     private isLoading: boolean = true;
@@ -165,71 +162,77 @@ export class PageDraw {
         }
 
         return (
-            <container>
-                <h3>Drawing</h3>
-                <container class="drawing-area">
-                    <ion-grid>
-                        <ion-row>
-                            <ion-col size="6">
-                                {this.renderPersonList(this.leftSide)}
-                            </ion-col>
-                            <ion-col size="6">
-                                {this.renderPersonList(this.rightSide)}
-                            </ion-col>
-                        </ion-row>
-                        <ion-row>
-                            <ion-col size="6">
-                                <ion-button
-                                    shape="round"
-                                    disabled={
-                                        this.transitionTimeoutHandles.length > 0
-                                    }
-                                    onClick={this.startShuffle}
-                                    expand="block"
-                                >
-                                    Shuffle
-                                </ion-button>
-                            </ion-col>
-                            <ion-col size="6">
-                                <ion-button
-                                    shape="round"
-                                    disabled={
-                                        this.transitionTimeoutHandles.length ===
-                                        0
-                                    }
-                                    onClick={this.clearTransitions}
-                                    expand="block"
-                                >
-                                    Stop Shuffle
-                                </ion-button>
-                            </ion-col>
-                        </ion-row>
-                    </ion-grid>
-                </container>
+            <container class="drawing-area">
+                <ion-grid>
+                    <ion-row>
+                        <ion-col size="12">{this.renderPersonList()}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="6">
+                            <ion-button
+                                shape="round"
+                                disabled={
+                                    this.transitionTimeoutHandles.length > 0
+                                }
+                                onClick={this.startShuffle}
+                                expand="block"
+                            >
+                                Shuffle
+                            </ion-button>
+                        </ion-col>
+                        <ion-col size="6">
+                            <ion-button
+                                shape="round"
+                                disabled={
+                                    this.transitionTimeoutHandles.length === 0
+                                }
+                                onClick={this.clearTransitions}
+                                expand="block"
+                            >
+                                Stop Shuffle
+                            </ion-button>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
             </container>
         );
     };
 
-    private renderPersonList = (personOrder: number[]) => {
+    private renderPersonList = () => {
         return (
-            <ion-list class="person-list">
+            <div class="person-list">
                 {this.persons.map((person, index) => {
-                    return this.renderItem(
-                        person,
-                        index,
-                        personOrder.findIndex(
-                            personId => personId === person.id
-                        )
+                    return (
+                        <div class="give-container">
+                            {this.renderItem(
+                                person,
+                                index,
+                                this.leftSide.findIndex(
+                                    personId => personId === person.id
+                                ),
+                                'left'
+                            )}
+                            <span>Ger till</span>
+                            {this.renderItem(
+                                person,
+                                index,
+                                this.rightSide.findIndex(
+                                    personId => personId === person.id
+                                ),
+                                'right'
+                            )}
+                        </div>
                     );
                 })}
-            </ion-list>
+            </div>
         );
     };
 
     private renderItem = (
         person: models.Person,
         originalIndex: number,
-        orderIndex: number
+        orderIndex: number,
+        location: 'right' | 'left'
     ) => {
         const pictureUrl = person?.pictureUrl || DEFAULT_PROFILE_PICTURE;
 
@@ -238,11 +241,11 @@ export class PageDraw {
         const cssAnimationLength = `${this.animationLength / 1000}s`;
 
         return (
-            <ion-item
-                class="person"
+            <div
+                class={{ [location]: true, person: true }}
                 style={{
                     '--animation-length': cssAnimationLength,
-                    transform: `translateY(${diff * ITEM_HEIGHT}px)`,
+                    '--render-diff': diff.toString(),
                 }}
             >
                 <ion-avatar>
@@ -252,7 +255,7 @@ export class PageDraw {
                     />
                 </ion-avatar>
                 <ion-label>{person.name}</ion-label>
-            </ion-item>
+            </div>
         );
     };
 
