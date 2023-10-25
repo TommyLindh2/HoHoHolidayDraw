@@ -15,8 +15,6 @@ export namespace Components {
     }
     interface PageGroupList {
     }
-    interface PageHome {
-    }
     interface PagePersonList {
     }
     interface PageProfile {
@@ -48,12 +46,6 @@ declare global {
         prototype: HTMLPageGroupListElement;
         new (): HTMLPageGroupListElement;
     };
-    interface HTMLPageHomeElement extends Components.PageHome, HTMLStencilElement {
-    }
-    var HTMLPageHomeElement: {
-        prototype: HTMLPageHomeElement;
-        new (): HTMLPageHomeElement;
-    };
     interface HTMLPagePersonListElement extends Components.PagePersonList, HTMLStencilElement {
     }
     var HTMLPagePersonListElement: {
@@ -71,7 +63,6 @@ declare global {
         "app-tabs": HTMLAppTabsElement;
         "page-draw": HTMLPageDrawElement;
         "page-group-list": HTMLPageGroupListElement;
-        "page-home": HTMLPageHomeElement;
         "page-person-list": HTMLPagePersonListElement;
         "page-profile": HTMLPageProfileElement;
     }
@@ -86,8 +77,6 @@ declare namespace LocalJSX {
     }
     interface PageGroupList {
     }
-    interface PageHome {
-    }
     interface PagePersonList {
     }
     interface PageProfile {
@@ -98,7 +87,6 @@ declare namespace LocalJSX {
         "app-tabs": AppTabs;
         "page-draw": PageDraw;
         "page-group-list": PageGroupList;
-        "page-home": PageHome;
         "page-person-list": PagePersonList;
         "page-profile": PageProfile;
     }
@@ -111,7 +99,6 @@ declare module "@stencil/core" {
             "app-tabs": LocalJSX.AppTabs & JSXBase.HTMLAttributes<HTMLAppTabsElement>;
             "page-draw": LocalJSX.PageDraw & JSXBase.HTMLAttributes<HTMLPageDrawElement>;
             "page-group-list": LocalJSX.PageGroupList & JSXBase.HTMLAttributes<HTMLPageGroupListElement>;
-            "page-home": LocalJSX.PageHome & JSXBase.HTMLAttributes<HTMLPageHomeElement>;
             "page-person-list": LocalJSX.PagePersonList & JSXBase.HTMLAttributes<HTMLPagePersonListElement>;
             "page-profile": LocalJSX.PageProfile & JSXBase.HTMLAttributes<HTMLPageProfileElement>;
         }

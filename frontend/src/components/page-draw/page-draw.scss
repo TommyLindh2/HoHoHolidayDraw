@@ -1,44 +1,44 @@
 ion-avatar {
-  margin-right: 1rem;
+    margin-right: 1rem;
 }
 
 .title {
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  justify-content: center;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    justify-content: center;
 
-  ion-skeleton-text {
-    max-width: 10rem;
-    --background: rgba(255, 255, 255, 0.765);
-    --background-rgb: 255, 255, 255;
-  }
+    ion-skeleton-text {
+        max-width: 10rem;
+        --background: rgba(255, 255, 255, 0.765);
+        --background-rgb: 255, 255, 255;
+    }
 }
 
 .content {
-  max-width: 55rem;
-  margin: auto;
+    max-width: 55rem;
+    margin: auto;
 }
 
 .person {
-  --animation-length: var(--animation-length, 0.5s);
+    --animation-length: var(--animation-length, 0.5s);
 
-  -webkit-transition: transform var(--animation-length) ease-in-out;
-  transition: transform var(--animation-length) ease-in-out;
+    -webkit-transition: transform var(--animation-length) ease-in-out;
+    transition: transform var(--animation-length) ease-in-out;
 }
 
 .person-list {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .settings {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 1rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
 
-  & > * {
-    min-width: min(20rem, 100%);
-  }
+    & > * {
+        min-width: min(20rem, 100%);
+    }
 }
