@@ -1,3 +1,8 @@
+:root {
+    --grid-gap: 1rem;
+    --container-padding: 0.5rem;
+}
+
 .title {
     display: flex;
     flex-direction: row;
@@ -11,51 +16,120 @@
     }
 }
 
-.content {
-    max-width: 55rem;
-    margin: auto;
-}
-
-.person {
-    display: flex;
-    flex-direction: row;
-
-    &.left {
-        flex-direction: row-reverse;
-    }
-
-    --animation-length: var(--animation-length, 0.5s);
-    --render-diff: var(--render-diff, 0);
-
-    transform: translateY(calc(var(--render-diff) * 3rem));
-
-    ion-avatar {
-        height: 2rem;
-        width: 2rem;
-    }
-
-    -webkit-transition: transform var(--animation-length) ease-in-out;
-    transition: transform var(--animation-length) ease-in-out;
-}
-
-.give-container {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-
-    & > * {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        height: 2rem;
-    }
-
+.settings,
+.drawing-area {
     padding: 0.5rem;
 }
 
+ion-grid,
+ion-col {
+    padding: 0;
+}
+
+ion-col ion-button {
+    padding-top: 0.5rem;
+    margin: 0;
+    &:first-child {
+        padding-right: 0.125rem;
+    }
+    &:last-child {
+        padding-left: 0.125rem;
+    }
+}
+
+ion-accordion {
+    border: solid 2px red;
+    $border-radius: 0.5rem;
+    &:first-child {
+        border-top-left-radius: $border-radius;
+        border-top-right-radius: $border-radius;
+    }
+    &:last-child {
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+    }
+
+    ion-item[slot='header'] {
+        --background: red;
+        --ion-item-color: white;
+        --ion-text-color-rgb: white;
+    }
+}
+
+.content {
+    margin: auto;
+}
+
 .person-list {
-    display: flex;
-    flex-direction: column;
+    --column-width: min(var(--column-width), calc(100% - var(--grid-gap)));
+
+    display: grid;
+    justify-content: center;
+    gap: var(--grid-gap);
+
+    grid-template-columns: repeat(var(--columns), var(--column-width));
+
+    .give-container {
+        display: flex;
+        justify-content: center;
+        gap: 0.25rem;
+        height: var(--column-height);
+
+        & > * {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            text-align: center;
+        }
+
+        .person {
+            width: 100%;
+        }
+
+        span {
+            white-space: nowrap;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        border-radius: 9999999px;
+        padding: var(--container-padding);
+        box-shadow: inset 0px 0px 5px 1px rgba(255, 0, 0, 0.832);
+    }
+
+    .person {
+        /* Make person container row/row-reverse direction */
+        flex-direction: row;
+        &.left {
+            flex-direction: row-reverse;
+        }
+
+        --animation-length: var(--animation-length, 0.5s);
+
+        --column-width: min(var(--column-width), calc(100% - var(--grid-gap)));
+
+        --full-width: calc(var(--column-width) + var(--grid-gap));
+        --full-height: calc(var(--column-height) + var(--grid-gap));
+
+        transform: translate(
+            calc(var(--render-diff-x, 0) * var(--full-width)),
+            calc(var(--render-diff-y, 0) * var(--full-height))
+        );
+
+        ion-avatar {
+            height: 2rem;
+            width: 2rem;
+        }
+
+        -webkit-transition: transform var(--animation-length) ease-in-out;
+        transition: transform var(--animation-length) ease-in-out;
+    }
+
+    &.compact {
+        .person {
+            flex-direction: column;
+        }
+    }
 }
 
 .settings {

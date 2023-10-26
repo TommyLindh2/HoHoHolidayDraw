@@ -26,5 +26,9 @@ function startSnow() {
         ...LetItGo.DEFAULT_OPTIONS,
         // radius range of snowflake, defaults to `[0.5, 1]`
         radiusRange: [0.75, 1.75],
+        style: {
+            zIndex: '9999',
+            pointerEvents: 'none',
+        },
     });
 }

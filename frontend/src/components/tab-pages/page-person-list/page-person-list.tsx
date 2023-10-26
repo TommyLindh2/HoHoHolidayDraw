@@ -62,7 +62,7 @@ export class PagePersonList {
 
         return (
             <ion-item href={`/profile/${person.id}`} key={person.name}>
-                <ion-avatar>
+                <ion-avatar slot="start">
                     <img
                         alt={`Profile picture of ${person?.name}`}
                         src={pictureUrl}

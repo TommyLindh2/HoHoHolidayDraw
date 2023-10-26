@@ -12,7 +12,11 @@ import { Component, Fragment, h, State, Prop } from '@stencil/core';
 import { BackendClient } from '../../services/backendClient';
 import * as models from '../../models';
 import { DEFAULT_PROFILE_PICTURE } from '../../config';
-import { RangeCustomEvent } from '@ionic/core';
+import {
+    AccordionGroupChangeEventDetail,
+    IonAccordionGroupCustomEvent,
+    RangeCustomEvent,
+} from '@ionic/core';
 
 @Component({
     tag: 'page-draw',
@@ -38,6 +42,9 @@ export class PageDraw {
     private animationCount: number = 5;
 
     @State()
+    private columns = 1;
+
+    @State()
     private isLoading: boolean = true;
 
     @State()
@@ -45,6 +52,26 @@ export class PageDraw {
 
     @State()
     private group: models.Group;
+
+    @State()
+    private openedGroups: string[] = ['persons'];
+
+    private get cssVariables() {
+        const isCompact = this.columns > 1;
+
+        const cssVariables = {
+            '--columns': this.columns.toString(),
+            '--column-width': 'min(55rem, 100%)',
+            '--column-height': '3rem',
+        };
+
+        if (isCompact) {
+            cssVariables['--column-width'] = '15rem';
+            cssVariables['--column-height'] = '5rem';
+        }
+
+        return cssVariables;
+    }
 
     private get client(): BackendClient {
         return BackendClient.GetInstance();
@@ -68,15 +95,47 @@ export class PageDraw {
             <Fragment>
                 {this.renderHeader()}
                 <ion-content class="ion-padding">
-                    <div class="content">
-                        {this.renderLoader()}
-                        {this.renderPersonDrawArea()}
-                        {this.renderSettings()}
-                    </div>
+                    {this.renderLoader()}
+                    <ion-accordion-group
+                        onIonChange={this.accordionGroupChange}
+                        class="content"
+                        multiple
+                        value={this.openedGroups}
+                    >
+                        <ion-accordion value="settings">
+                            <ion-item slot="header">
+                                <ion-label>Settings</ion-label>
+                            </ion-item>
+                            {this.renderSettings()}
+                        </ion-accordion>
+                        <ion-accordion value="persons">
+                            <ion-item expanded slot="header">
+                                <ion-label>Persons</ion-label>
+                            </ion-item>
+                            {this.renderPersonDrawArea()}
+                        </ion-accordion>
+                    </ion-accordion-group>
                 </ion-content>
             </Fragment>
         );
     }
+
+    private accordionGroupChange = (
+        event: IonAccordionGroupCustomEvent<AccordionGroupChangeEventDetail>
+    ) => {
+        console.log('event', event);
+        const toggledItem = event.detail.value;
+
+        const index = this.openedGroups.indexOf(toggledItem);
+
+        if (index < 0) {
+            this.openedGroups.push(toggledItem);
+        } else {
+            this.openedGroups = this.openedGroups.filter(
+                (_item, i) => i !== index
+            );
+        }
+    };
 
     private renderHeader() {
         return (
@@ -102,48 +161,69 @@ export class PageDraw {
 
     private renderSettings = () => {
         return (
-            <container>
-                <h3>Settings</h3>
-                <container class="settings">
-                    <ion-range
-                        pin
-                        min={1}
-                        max={50}
-                        ticks
-                        step={1}
-                        value={this.animationCount}
-                        labelPlacement="stacked"
-                        label={`Animation count - ${this.animationCount} time(s)`}
-                        pinFormatter={(value: number) => {
-                            return `${value}`;
-                        }}
-                        onIonInput={(event: RangeCustomEvent) => {
-                            this.animationCount = event.detail.value as number;
-                        }}
-                    >
-                        <ion-label slot="start">1</ion-label>
-                        <ion-label slot="end">50</ion-label>
-                    </ion-range>
-                    <ion-range
-                        min={0}
-                        max={1500}
-                        ticks
-                        step={50}
-                        pin
-                        value={this.animationLength}
-                        pinFormatter={(value: number) => {
-                            return `${value}`;
-                        }}
-                        labelPlacement="stacked"
-                        label={`Animation length - ${this.animationLength}ms`}
-                        onIonInput={(event: RangeCustomEvent) => {
-                            this.animationLength = event.detail.value as number;
-                        }}
-                    >
-                        <ion-icon slot="start" name="airplane-outline" />
-                        <ion-icon slot="end" name="walk-outline" />
-                    </ion-range>
-                </container>
+            <container
+                slot="content"
+                class="settings"
+                onIonChange={(event: CustomEvent) => event.stopPropagation()}
+            >
+                <ion-range
+                    pin
+                    min={1}
+                    max={50}
+                    ticks
+                    step={1}
+                    value={this.animationCount}
+                    labelPlacement="stacked"
+                    label={`Animation count - ${this.animationCount} time(s)`}
+                    pinFormatter={(value: number) => {
+                        return `${value}`;
+                    }}
+                    onIonInput={(event: RangeCustomEvent) => {
+                        this.animationCount = event.detail.value as number;
+                    }}
+                >
+                    <ion-label slot="start">1</ion-label>
+                    <ion-label slot="end">50</ion-label>
+                </ion-range>
+                <ion-range
+                    min={0}
+                    max={1500}
+                    ticks
+                    step={50}
+                    pin
+                    value={this.animationLength}
+                    pinFormatter={(value: number) => {
+                        return `${value}`;
+                    }}
+                    labelPlacement="stacked"
+                    label={`Animation length - ${this.animationLength}ms`}
+                    onIonInput={(event: RangeCustomEvent) => {
+                        this.animationLength = event.detail.value as number;
+                    }}
+                >
+                    <ion-icon slot="start" name="airplane-outline" />
+                    <ion-icon slot="end" name="walk-outline" />
+                </ion-range>
+                <ion-range
+                    pin
+                    min={1}
+                    max={6}
+                    ticks
+                    snaps
+                    step={1}
+                    value={this.columns}
+                    labelPlacement="stacked"
+                    label={`Number of columns - ${this.columns}`}
+                    pinFormatter={(value: number) => {
+                        return `${value}`;
+                    }}
+                    onIonInput={(event: RangeCustomEvent) => {
+                        this.columns = event.detail.value as number;
+                    }}
+                >
+                    <ion-label slot="start">1</ion-label>
+                    <ion-label slot="end">6</ion-label>
+                </ion-range>
             </container>
         );
     };
@@ -162,8 +242,11 @@ export class PageDraw {
         }
 
         return (
-            <container class="drawing-area">
-                <ion-grid>
+            <container
+                slot="content"
+                onIonChange={(event: CustomEvent) => event.stopPropagation()}
+            >
+                <ion-grid class="drawing-area">
                     <ion-row>
                         <ion-col size="12">{this.renderPersonList()}</ion-col>
                     </ion-row>
@@ -199,26 +282,32 @@ export class PageDraw {
     };
 
     private renderPersonList = () => {
+        const cssVariables = this.cssVariables;
         return (
-            <div class="person-list">
+            <div
+                class={{ 'person-list': true, compact: this.columns > 1 }}
+                style={cssVariables}
+            >
                 {this.persons.map((person, index) => {
                     return (
-                        <div class="give-container">
+                        <div class="give-container" style={cssVariables}>
                             {this.renderItem(
                                 person,
                                 index,
                                 this.leftSide.findIndex(
                                     personId => personId === person.id
                                 ),
+                                cssVariables,
                                 'left'
                             )}
-                            <span>Ger till</span>
+                            <span>ger till</span>
                             {this.renderItem(
                                 person,
                                 index,
                                 this.rightSide.findIndex(
                                     personId => personId === person.id
                                 ),
+                                cssVariables,
                                 'right'
                             )}
                         </div>
@@ -232,20 +321,27 @@ export class PageDraw {
         person: models.Person,
         originalIndex: number,
         orderIndex: number,
-        location: 'right' | 'left'
+        cssVariables: any,
+        position: 'left' | 'right'
     ) => {
         const pictureUrl = person?.pictureUrl || DEFAULT_PROFILE_PICTURE;
 
-        const diff = orderIndex - originalIndex;
+        const [orderX, orderY] = this.getPosition(orderIndex);
+        const [orgX, orgY] = this.getPosition(originalIndex);
+
+        const diffY = orderY - orgY;
+        const diffX = orderX - orgX;
 
         const cssAnimationLength = `${this.animationLength / 1000}s`;
 
         return (
             <div
-                class={{ [location]: true, person: true }}
+                class={{ person: true, [position]: true }}
                 style={{
                     '--animation-length': cssAnimationLength,
-                    '--render-diff': diff.toString(),
+                    '--render-diff-y': diffY.toString(),
+                    '--render-diff-x': diffX.toString(),
+                    ...cssVariables,
                 }}
             >
                 <ion-avatar>
@@ -344,5 +440,12 @@ export class PageDraw {
         }
 
         return [...array];
+    };
+
+    private getPosition = (index: number): [number, number] => {
+        const x = index % this.columns;
+        const y = Math.floor(index / this.columns);
+
+        return [x, y];
     };
 }
