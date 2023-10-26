@@ -95,6 +95,9 @@ ion-accordion {
         border-radius: 9999999px;
         padding: var(--container-padding);
         box-shadow: inset 0px 0px 5px 1px rgba(255, 0, 0, 0.832);
+        &.done-drawing {
+            box-shadow: inset 0px 0px 5px 1px rgba(0, 107, 0, 0.832);
+        }
     }
 
     .person {

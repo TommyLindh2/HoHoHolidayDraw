@@ -85,7 +85,7 @@ export function InitializeDefaultPersons(storage: DbStorage) {
 
     const groups: Array<Partial<models.Group> & { persons?: string[] }> = [
         {
-            name: "Hemma hos Tommys familj",
+            name: "Lindharna",
             persons: [
                 "Tommy",
                 "Sanna HL",
@@ -99,7 +99,7 @@ export function InitializeDefaultPersons(storage: DbStorage) {
             ],
         },
         {
-            name: "Hemma hos Sannas familj (förmiddag & Kväll)",
+            name: "Åkerbotorp",
             persons: [
                 "Tommy",
                 "Sanna HL",
@@ -114,7 +114,7 @@ export function InitializeDefaultPersons(storage: DbStorage) {
             ],
         },
         {
-            name: "Hemma hos Sannas familj (kväll)",
+            name: "Milleshuset",
             persons: [
                 "Tommy",
                 "Sanna HL",

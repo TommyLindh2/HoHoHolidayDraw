@@ -1,6 +1,5 @@
 /**
  * FRONTEND:
- *  TODO: Rendering the drawing in pairs in a grid instead of just a list.
  *  TODO: Prevent endless loops if last shuffle is the same person.
  *  TODO: Be able to add/update/delete groups, persons and belongings
  *
@@ -55,6 +54,9 @@ export class PageDraw {
 
     @State()
     private openedGroups: string[] = ['persons'];
+
+    @State()
+    private doneDrawingIndex: number[] = [];
 
     private get cssVariables() {
         const isCompact = this.columns > 1;
@@ -290,7 +292,14 @@ export class PageDraw {
             >
                 {this.persons.map((person, index) => {
                     return (
-                        <div class="give-container" style={cssVariables}>
+                        <div
+                            class={{
+                                'give-container': true,
+                                'done-drawing':
+                                    this.doneDrawingIndex.includes(index),
+                            }}
+                            style={cssVariables}
+                        >
                             {this.renderItem(
                                 person,
                                 index,
@@ -401,6 +410,7 @@ export class PageDraw {
 
     private startShuffle = async () => {
         this.clearTransitions();
+        this.doneDrawingIndex = [];
 
         for (
             let personIndex = 0;
@@ -410,6 +420,7 @@ export class PageDraw {
             for (let i = 0; i < Math.max(1, this.animationCount); i++) {
                 await this.shuffleListsFromIndex(personIndex);
             }
+            this.doneDrawingIndex.push(personIndex);
         }
 
         this.clearTransitions();
