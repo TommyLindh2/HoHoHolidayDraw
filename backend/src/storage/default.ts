@@ -25,9 +25,6 @@ export function InitializeDefaultPersons(storage: DbStorage) {
             pictureUrl: profilesPrefix + "lena.jpg",
         },
         {
-            name: "Anders",
-        },
-        {
             name: "Tobias",
         },
         {
@@ -80,10 +77,11 @@ export function InitializeDefaultPersons(storage: DbStorage) {
     ];
 
     for (let i = 0; i < persons.length; i++) {
-        persons[i] = storage.CreatePerson(persons[i]);
+        persons[i] = storage.CreatePerson(persons[i] as models.Person);
     }
 
-    const groups: Array<Partial<models.Group> & { persons?: string[] }> = [
+    type GroupWithPersons = Partial<models.Group> & { persons?: string[] };
+    const groups: Array<GroupWithPersons> = [
         {
             name: "Lindharna",
             persons: [
@@ -133,7 +131,7 @@ export function InitializeDefaultPersons(storage: DbStorage) {
     ];
 
     for (let i = 0; i < groups.length; i++) {
-        const group = groups[i];
+        const group = groups[i] as GroupWithPersons;
         const groupBelongings = group?.persons ?? [];
         delete group.persons;
 
