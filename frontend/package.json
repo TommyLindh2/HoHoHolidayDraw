@@ -1,8 +1,8 @@
 {
-  "name": "hohoholidaydraw",
+  "name": "@hohoholidaydraw/frontend",
   "private": true,
-  "version": "0.0.1",
-  "description": "Stencil Ionic App Starter",
+  "version": "1.0.0",
+  "description": "Frontend application for HoHoHolidayDraw - Ionic + Stencil",
   "scripts": {
     "build": "stencil build",
     "start": "stencil build --dev --watch --serve",
@@ -24,5 +24,17 @@
   "dependencies": {
     "@stencil/sass": "^3.0.6",
     "let-it-go": "^1.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "frontend",
+    "ionic",
+    "stencil",
+    "typescript",
+    "secret-santa"
+  ],
+  "author": "Tommy Hallman Lindh"
 }

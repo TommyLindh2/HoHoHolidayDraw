@@ -1,19 +1,28 @@
 {
-    "name": "backend",
+    "name": "@hohoholidaydraw/backend",
     "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "description": "Backend API for HoHoHolidayDraw application",
+    "main": "dist/app.js",
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc",
         "start": "ts-node-dev src/app.ts --respawn --transpileOnly"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "keywords": [
+        "api",
+        "express",
+        "typescript",
+        "secret-santa"
+    ],
+    "author": "Tommy Hallman Lindh",
+    "license": "MIT",
     "dependencies": {
-        "@types/express": "^4.17.18",
-        "@types/node": "^20.8.3",
+        "@types/express": "^4.17.21",
+        "@types/node": "^20.9.0",
         "cors": "^2.8.5",
         "express": "^4.18.2",
         "typescript": "^5.2.2"
