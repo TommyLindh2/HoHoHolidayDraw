@@ -20,7 +20,7 @@ app.get("/api/person", (req: Request, res: Response) => {
     });
 });
 
-app.get("/api/person/:id", (req: Request, res: Response) => {
+app.get("/api/person/:id", (req: Request<{id: string}>, res: Response) => {
     const requestedId = req.params.id;
     if (isNaN(requestedId as any)) {
         return res
@@ -45,7 +45,7 @@ app.get("/api/group", (req: Request, res: Response) => {
     });
 });
 
-app.get("/api/group/:id", (req: Request, res: Response) => {
+app.get("/api/group/:id", (req: Request<{id: string}>, res: Response) => {
     const requestedId = req.params.id;
     if (isNaN(requestedId as any)) {
         return res
@@ -64,7 +64,7 @@ app.get("/api/group/:id", (req: Request, res: Response) => {
     return res.json(group);
 });
 
-app.get("/api/group/:id/person", (req: Request, res: Response) => {
+app.get("/api/group/:id/person", (req: Request<{id: string}>, res: Response) => {
     const requestedId = req.params.id;
     if (isNaN(requestedId as any)) {
         return res

@@ -64,7 +64,7 @@ export class MemoryStorage implements DbStorage {
         }
 
         this.persons[foundIndex] = {
-            ...this.persons[foundIndex],
+            ...this.persons[foundIndex] as Person,
             ...person,
         };
 
@@ -88,7 +88,7 @@ export class MemoryStorage implements DbStorage {
         }
 
         this.groups[foundIndex] = {
-            ...this.groups[foundIndex],
+            ...this.groups[foundIndex] as Group,
             ...group,
         };
 
