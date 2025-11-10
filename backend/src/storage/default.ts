@@ -28,6 +28,10 @@ export function InitializeDefaultPersons(storage: DbStorage) {
             name: "Tobias",
         },
         {
+            name: "Calle",
+            pictureUrl: profilesPrefix + "calle.jpg",
+        },
+        {
             name: "P-O",
             pictureUrl: profilesPrefix + "po.jpg",
         },
@@ -91,6 +95,7 @@ export function InitializeDefaultPersons(storage: DbStorage) {
                 "Annie",
                 "Lena",
                 "Tobias",
+                "Calle",
                 "P-O",
                 "Annalena",
             ],
