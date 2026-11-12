@@ -3,10 +3,10 @@ type Attributes = "id" | "name";
 
 export class NotFoundError extends Error {
     constructor(
-        public entity: Entities,
-        public attribute: Attributes,
-        public lookupValue: any
+        public readonly entity: Entities,
+        public readonly attribute: Attributes,
+        public readonly lookupValue: unknown
     ) {
-        super(`NotFound - ${entity} by ${attribute}:${lookupValue}`);
+        super(`${entity} with ${attribute} ${String(lookupValue)} not found`);
     }
 }
