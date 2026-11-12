@@ -1,18 +1,13 @@
-/**
- * FRONTEND:
- *  TODO: Prevent endless loops if last shuffle is the same person.
- *  TODO: Be able to add/update/delete groups, persons and belongings
- *
- * BACKEND:
- *  TODO: Add delete endpoints
- *  TODO: Implement database storage
- */
 import { Component, Fragment, h, State, Prop } from '@stencil/core';
 import { BackendClient } from '../../services/backendClient';
 import * as models from '../../models';
 import { DEFAULT_PROFILE_PICTURE } from '../../config';
+import { t } from '../../i18n';
+import { decoyShuffle, revealRow } from '../../utils/shuffle';
+import { showError, showToast } from '../../utils/ui';
 import {
     AccordionGroupChangeEventDetail,
+    InputCustomEvent,
     IonAccordionGroupCustomEvent,
     RangeCustomEvent,
 } from '@ionic/core';
@@ -28,6 +23,7 @@ export class PageDraw {
     @Prop()
     public groupId: number;
 
+    /** Person ids in display order. Row i shows leftSide[i] giving to rightSide[i]. */
     @State()
     private leftSide: number[] = [];
 
@@ -47,7 +43,7 @@ export class PageDraw {
     private isLoading: boolean = true;
 
     @State()
-    private transitionTimeoutHandles: NodeJS.Timeout[] = [];
+    private isShuffling: boolean = false;
 
     @State()
     private group: models.Group;
@@ -58,7 +54,23 @@ export class PageDraw {
     @State()
     private doneDrawingIndex: number[] = [];
 
-    private get cssVariables() {
+    /** What the user typed. Empty means "give me a random draw". */
+    @State()
+    private seedInput: string = '';
+
+    /** The seed behind the draw currently shown. */
+    @State()
+    private lastSeed: string | null = null;
+
+    /** Bumped on every start/stop so an old animation knows to quit. */
+    private shuffleRun = 0;
+
+    private pendingWait: {
+        handle: ReturnType<typeof setTimeout>;
+        resolve: () => void;
+    } | null = null;
+
+    private get cssVariables(): Record<string, string> {
         const isCompact = this.columns > 1;
 
         const cssVariables = {
@@ -79,17 +91,29 @@ export class PageDraw {
         return BackendClient.GetInstance();
     }
 
-    public async componentDidLoad() {
-        const [group, persons] = await Promise.all([
-            this.client.GetGroupById(this.groupId),
-            this.client.GetPersonByGroupId(this.groupId),
-        ]).finally(() => (this.isLoading = false));
+    private get canShuffle(): boolean {
+        return this.persons.length >= 2;
+    }
 
-        this.group = group;
-        this.persons = persons;
+    public async componentDidLoad(): Promise<void> {
+        try {
+            const [group, persons] = await Promise.all([
+                this.client.GetGroupById(this.groupId),
+                this.client.GetPersonByGroupId(this.groupId),
+            ]);
+            this.group = group;
+            this.persons = persons;
+            this.leftSide = persons.map(p => p.id);
+            this.rightSide = persons.map(p => p.id);
+        } catch (error) {
+            await showError(error);
+        } finally {
+            this.isLoading = false;
+        }
+    }
 
-        this.leftSide = this.persons.map(p => p.id);
-        this.rightSide = this.persons.map(p => p.id);
+    public disconnectedCallback(): void {
+        this.stopShuffle();
     }
 
     public render() {
@@ -106,13 +130,13 @@ export class PageDraw {
                     >
                         <ion-accordion value="settings">
                             <ion-item slot="header">
-                                <ion-label>Settings</ion-label>
+                                <ion-label>{t('Settings')}</ion-label>
                             </ion-item>
                             {this.renderSettings()}
                         </ion-accordion>
                         <ion-accordion value="persons">
                             <ion-item expanded slot="header">
-                                <ion-label>Persons</ion-label>
+                                <ion-label>{t('Persons')}</ion-label>
                             </ion-item>
                             {this.renderPersonDrawArea()}
                         </ion-accordion>
@@ -125,7 +149,6 @@ export class PageDraw {
     private accordionGroupChange = (
         event: IonAccordionGroupCustomEvent<AccordionGroupChangeEventDetail>
     ) => {
-        console.log('event', event);
         const toggledItem = event.detail.value;
 
         const index = this.openedGroups.indexOf(toggledItem);
@@ -148,7 +171,7 @@ export class PageDraw {
                     </ion-buttons>
                     <ion-title>
                         <div class="title">
-                            <span>Draw</span>
+                            <span>{t('Draw')}</span>
                             {this.group ? (
                                 [<span>-</span>, <span>{this.group.name}</span>]
                             ) : (
@@ -176,7 +199,9 @@ export class PageDraw {
                     step={1}
                     value={this.animationCount}
                     labelPlacement="stacked"
-                    label={`Animation count - ${this.animationCount} time(s)`}
+                    label={t('Animation count - {count} time(s)', {
+                        count: this.animationCount,
+                    })}
                     pinFormatter={(value: number) => {
                         return `${value}`;
                     }}
@@ -198,7 +223,9 @@ export class PageDraw {
                         return `${value}`;
                     }}
                     labelPlacement="stacked"
-                    label={`Animation length - ${this.animationLength}ms`}
+                    label={t('Animation length - {ms}ms', {
+                        ms: this.animationLength,
+                    })}
                     onIonInput={(event: RangeCustomEvent) => {
                         this.animationLength = event.detail.value as number;
                     }}
@@ -215,7 +242,9 @@ export class PageDraw {
                     step={1}
                     value={this.columns}
                     labelPlacement="stacked"
-                    label={`Number of columns - ${this.columns}`}
+                    label={t('Number of columns - {count}', {
+                        count: this.columns,
+                    })}
                     pinFormatter={(value: number) => {
                         return `${value}`;
                     }}
@@ -226,6 +255,7 @@ export class PageDraw {
                     <ion-label slot="start">1</ion-label>
                     <ion-label slot="end">6</ion-label>
                 </ion-range>
+                {this.renderSeed()}
             </container>
         );
     };
@@ -252,35 +282,99 @@ export class PageDraw {
                     <ion-row>
                         <ion-col size="12">{this.renderPersonList()}</ion-col>
                     </ion-row>
+                    {!this.canShuffle && (
+                        <ion-row>
+                            <ion-col size="12">
+                                <ion-text color="medium">
+                                    <p>
+                                        {t(
+                                            'A draw needs at least two persons.'
+                                        )}
+                                    </p>
+                                </ion-text>
+                            </ion-col>
+                        </ion-row>
+                    )}
                     <ion-row>
                         <ion-col size="6">
                             <ion-button
                                 shape="round"
-                                disabled={
-                                    this.transitionTimeoutHandles.length > 0
-                                }
+                                disabled={this.isShuffling || !this.canShuffle}
                                 onClick={this.startShuffle}
                                 expand="block"
                             >
-                                Shuffle
+                                {t('Shuffle')}
                             </ion-button>
                         </ion-col>
                         <ion-col size="6">
                             <ion-button
                                 shape="round"
-                                disabled={
-                                    this.transitionTimeoutHandles.length === 0
-                                }
-                                onClick={this.clearTransitions}
+                                disabled={!this.isShuffling}
+                                onClick={this.stopShuffle}
                                 expand="block"
                             >
-                                Stop Shuffle
+                                {t('Stop Shuffle')}
                             </ion-button>
                         </ion-col>
                     </ion-row>
                 </ion-grid>
             </container>
         );
+    };
+
+    private renderSeed = () => {
+        return (
+            <div class="seed">
+                <ion-input
+                    fill="outline"
+                    label={t('Seed')}
+                    labelPlacement="stacked"
+                    placeholder={t('Leave empty for a random draw')}
+                    helperText={t(
+                        'The same seed and the same persons always give the same result.'
+                    )}
+                    clearInput
+                    maxlength={64}
+                    value={this.seedInput}
+                    disabled={this.isShuffling}
+                    onIonInput={(event: InputCustomEvent) =>
+                        (this.seedInput = event.detail.value ?? '')
+                    }
+                />
+                {this.lastSeed && (
+                    <div class="last-seed">
+                        <span>
+                            {t('Seed used:')} <code>{this.lastSeed}</code>
+                        </span>
+                        <ion-button
+                            size="small"
+                            fill="clear"
+                            title={t('Copy seed')}
+                            onClick={this.copySeed}
+                        >
+                            <ion-icon slot="icon-only" name="copy-outline" />
+                        </ion-button>
+                        <ion-button
+                            size="small"
+                            fill="clear"
+                            disabled={this.isShuffling}
+                            onClick={() => (this.seedInput = this.lastSeed)}
+                        >
+                            {t('Use this seed')}
+                        </ion-button>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    private copySeed = async (): Promise<void> => {
+        try {
+            await navigator.clipboard.writeText(this.lastSeed ?? '');
+            await showToast(t('Seed copied'));
+        } catch (error) {
+            await showError(error);
+        }
     };
 
     private renderPersonList = () => {
@@ -303,19 +397,15 @@ export class PageDraw {
                             {this.renderItem(
                                 person,
                                 index,
-                                this.leftSide.findIndex(
-                                    personId => personId === person.id
-                                ),
+                                this.leftSide.indexOf(person.id),
                                 cssVariables,
                                 'left'
                             )}
-                            <span>ger till</span>
+                            <span>{t('gives to')}</span>
                             {this.renderItem(
                                 person,
                                 index,
-                                this.rightSide.findIndex(
-                                    personId => personId === person.id
-                                ),
+                                this.rightSide.indexOf(person.id),
                                 cssVariables,
                                 'right'
                             )}
@@ -330,7 +420,7 @@ export class PageDraw {
         person: models.Person,
         originalIndex: number,
         orderIndex: number,
-        cssVariables: any,
+        cssVariables: Record<string, string>,
         position: 'left' | 'right'
     ) => {
         const pictureUrl = person?.pictureUrl || DEFAULT_PROFILE_PICTURE;
@@ -355,7 +445,9 @@ export class PageDraw {
             >
                 <ion-avatar>
                     <img
-                        alt={`Profile picture of ${person?.name}`}
+                        alt={t('Profile picture of {name}', {
+                            name: person.name,
+                        })}
                         src={pictureUrl}
                     />
                 </ion-avatar>
@@ -364,94 +456,81 @@ export class PageDraw {
         );
     };
 
-    private shuffleListsFromIndex = (shuffleFromIndex: number = 0) => {
-        return new Promise<void>(resolve => {
-            this.transitionTimeoutHandles.push(
-                setTimeout(
-                    () => {
-                        let shuffledLeftPersons;
-                        let shuffledRightPersons;
-
-                        do {
-                            // Shuffle the order of leftPersons and rightPersons separately
-                            shuffledLeftPersons = this.leftSide
-                                .slice(0, shuffleFromIndex)
-                                .concat(
-                                    this.shuffleArray(
-                                        this.leftSide.slice(shuffleFromIndex)
-                                    )
-                                );
-                            shuffledRightPersons = this.rightSide
-                                .slice(0, shuffleFromIndex)
-                                .concat(
-                                    this.shuffleArray(
-                                        this.rightSide.slice(shuffleFromIndex)
-                                    )
-                                );
-                        } while (
-                            this.hasSamePersonAtSameIndex(
-                                shuffledLeftPersons,
-                                shuffledRightPersons
-                            )
-                        );
-
-                        this.leftSide = shuffledLeftPersons;
-                        this.rightSide = shuffledRightPersons;
-
-                        resolve();
-                    },
-                    shuffleFromIndex >= this.persons.length - 1
-                        ? 0
-                        : this.animationLength
-                )
-            );
-        });
-    };
-
-    private startShuffle = async () => {
-        this.clearTransitions();
+    /**
+     * Fetches the (seeded) result from the backend first, then animates
+     * towards it row by row: a few decoy shuffles, then the real pair locks in.
+     */
+    private startShuffle = async (): Promise<void> => {
+        this.stopShuffle();
+        const run = ++this.shuffleRun;
         this.doneDrawingIndex = [];
+        this.isShuffling = true;
 
-        for (
-            let personIndex = 0;
-            personIndex < this.persons.length;
-            personIndex++
-        ) {
-            for (let i = 0; i < Math.max(1, this.animationCount); i++) {
-                await this.shuffleListsFromIndex(personIndex);
+        let result: models.DrawResult;
+        try {
+            result = await this.client.GetDraw(
+                this.groupId,
+                this.seedInput.trim() || undefined
+            );
+        } catch (error) {
+            this.isShuffling = false;
+            await showError(error);
+            return;
+        }
+        if (run !== this.shuffleRun) {
+            return;
+        }
+        this.lastSeed = result.seed;
+
+        const rows = result.assignments.length;
+        const steps = Math.max(1, this.animationCount);
+
+        for (let row = 0; row < rows; row++) {
+            const { giverId, receiverId } = result.assignments[row];
+            for (let step = 1; step <= steps; step++) {
+                // The last row has only one possible pair left, no need to wait.
+                await this.wait(row === rows - 1 ? 0 : this.animationLength);
+                if (run !== this.shuffleRun) {
+                    return;
+                }
+
+                [this.leftSide, this.rightSide] =
+                    step < steps
+                        ? decoyShuffle(this.leftSide, this.rightSide, row)
+                        : revealRow(
+                              this.leftSide,
+                              this.rightSide,
+                              row,
+                              giverId,
+                              receiverId
+                          );
             }
-            this.doneDrawingIndex.push(personIndex);
+            this.doneDrawingIndex = [...this.doneDrawingIndex, row];
         }
 
-        this.clearTransitions();
+        this.isShuffling = false;
     };
 
-    private clearTransitions = () => {
-        for (const timeoutHandle of this.transitionTimeoutHandles) {
-            clearTimeout(timeoutHandle);
+    private stopShuffle = (): void => {
+        this.shuffleRun++;
+        if (this.pendingWait) {
+            clearTimeout(this.pendingWait.handle);
+            this.pendingWait.resolve();
+            this.pendingWait = null;
         }
-        this.transitionTimeoutHandles = [];
+        this.isShuffling = false;
     };
 
-    private hasSamePersonAtSameIndex(arr1: any[], arr2: any[]) {
-        // Helper function to check if the same person appears at the same index in both lists
-        for (let i = 0; i < arr1.length; i++) {
-            if (arr1[i] === arr2[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private shuffleArray = (array: any[]): any[] => {
-        // Randomly shuffle the array using Fisher-Yates algorithm
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-
-        return [...array];
-    };
+    private wait = (ms: number): Promise<void> =>
+        new Promise(resolve => {
+            this.pendingWait = {
+                resolve,
+                handle: setTimeout(() => {
+                    this.pendingWait = null;
+                    resolve();
+                }, ms),
+            };
+        });
 
     private getPosition = (index: number): [number, number] => {
         const x = index % this.columns;

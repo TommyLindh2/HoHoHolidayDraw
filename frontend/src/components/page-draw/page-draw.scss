@@ -145,3 +145,19 @@ ion-accordion {
         min-width: min(20rem, 100%);
     }
 }
+
+.seed {
+    margin-top: 1rem;
+
+    .last-seed {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+
+        code {
+            font-weight: bold;
+        }
+    }
+}

@@ -10,6 +10,12 @@ export namespace Components {
     }
     interface AppTabs {
     }
+    interface GroupEditor {
+        /**
+          * The group to edit. Leave out to create a new group.
+         */
+        "group"?: models.Group;
+    }
     interface PageDraw {
         "groupId": number;
     }
@@ -19,6 +25,12 @@ export namespace Components {
     }
     interface PageProfile {
         "personId": number;
+    }
+    interface PersonEditor {
+        /**
+          * The person to edit. Leave out to create a new person.
+         */
+        "person"?: models.Person;
     }
 }
 declare global {
@@ -33,6 +45,12 @@ declare global {
     var HTMLAppTabsElement: {
         prototype: HTMLAppTabsElement;
         new (): HTMLAppTabsElement;
+    };
+    interface HTMLGroupEditorElement extends Components.GroupEditor, HTMLStencilElement {
+    }
+    var HTMLGroupEditorElement: {
+        prototype: HTMLGroupEditorElement;
+        new (): HTMLGroupEditorElement;
     };
     interface HTMLPageDrawElement extends Components.PageDraw, HTMLStencilElement {
     }
@@ -58,19 +76,33 @@ declare global {
         prototype: HTMLPageProfileElement;
         new (): HTMLPageProfileElement;
     };
+    interface HTMLPersonEditorElement extends Components.PersonEditor, HTMLStencilElement {
+    }
+    var HTMLPersonEditorElement: {
+        prototype: HTMLPersonEditorElement;
+        new (): HTMLPersonEditorElement;
+    };
     interface HTMLElementTagNameMap {
         "app-root": HTMLAppRootElement;
         "app-tabs": HTMLAppTabsElement;
+        "group-editor": HTMLGroupEditorElement;
         "page-draw": HTMLPageDrawElement;
         "page-group-list": HTMLPageGroupListElement;
         "page-person-list": HTMLPagePersonListElement;
         "page-profile": HTMLPageProfileElement;
+        "person-editor": HTMLPersonEditorElement;
     }
 }
 declare namespace LocalJSX {
     interface AppRoot {
     }
     interface AppTabs {
+    }
+    interface GroupEditor {
+        /**
+          * The group to edit. Leave out to create a new group.
+         */
+        "group"?: models.Group;
     }
     interface PageDraw {
         "groupId"?: number;
@@ -82,13 +114,21 @@ declare namespace LocalJSX {
     interface PageProfile {
         "personId"?: number;
     }
+    interface PersonEditor {
+        /**
+          * The person to edit. Leave out to create a new person.
+         */
+        "person"?: models.Person;
+    }
     interface IntrinsicElements {
         "app-root": AppRoot;
         "app-tabs": AppTabs;
+        "group-editor": GroupEditor;
         "page-draw": PageDraw;
         "page-group-list": PageGroupList;
         "page-person-list": PagePersonList;
         "page-profile": PageProfile;
+        "person-editor": PersonEditor;
     }
 }
 export { LocalJSX as JSX };
@@ -97,10 +137,12 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "app-root": LocalJSX.AppRoot & JSXBase.HTMLAttributes<HTMLAppRootElement>;
             "app-tabs": LocalJSX.AppTabs & JSXBase.HTMLAttributes<HTMLAppTabsElement>;
+            "group-editor": LocalJSX.GroupEditor & JSXBase.HTMLAttributes<HTMLGroupEditorElement>;
             "page-draw": LocalJSX.PageDraw & JSXBase.HTMLAttributes<HTMLPageDrawElement>;
             "page-group-list": LocalJSX.PageGroupList & JSXBase.HTMLAttributes<HTMLPageGroupListElement>;
             "page-person-list": LocalJSX.PagePersonList & JSXBase.HTMLAttributes<HTMLPagePersonListElement>;
             "page-profile": LocalJSX.PageProfile & JSXBase.HTMLAttributes<HTMLPageProfileElement>;
+            "person-editor": LocalJSX.PersonEditor & JSXBase.HTMLAttributes<HTMLPersonEditorElement>;
         }
     }
 }

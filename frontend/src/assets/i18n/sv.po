@@ -1,0 +1,175 @@
+# Swedish translations for HoHoHolidayDraw.
+msgid ""
+msgstr ""
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#, fuzzy
+msgid "A draw needs at least two persons."
+msgstr "En dragning behöver minst två personer."
+
+#, fuzzy
+msgid "Animation count - {count} time(s)"
+msgstr "Antal animationer - {count} gång(er)"
+
+#, fuzzy
+msgid "Animation length - {ms}ms"
+msgstr "Animationslängd - {ms} ms"
+
+#, fuzzy
+msgid "Cancel"
+msgstr "Avbryt"
+
+#, fuzzy
+msgid "Copy seed"
+msgstr "Kopiera seed"
+
+#, fuzzy
+msgid "Delete"
+msgstr "Ta bort"
+
+#, fuzzy
+msgid "Delete {name}?"
+msgstr "Ta bort {name}?"
+
+#, fuzzy
+msgid "Draw"
+msgstr "Dragning"
+
+#, fuzzy
+msgid "Edit"
+msgstr "Redigera"
+
+#, fuzzy
+msgid "Edit group"
+msgstr "Redigera grupp"
+
+#, fuzzy
+msgid "Edit person"
+msgstr "Redigera person"
+
+#, fuzzy
+msgid "Group to draw"
+msgstr "Grupp att dra"
+
+#, fuzzy
+msgid "Leave empty for a random draw"
+msgstr "Lämna tomt för en slumpmässig dragning"
+
+#, fuzzy
+msgid "Leave empty to use the default picture"
+msgstr "Lämna tomt för att använda standardbilden"
+
+#, fuzzy
+msgid "Member of"
+msgstr "Medlem i"
+
+#, fuzzy
+msgid "Members ({count})"
+msgstr "Medlemmar ({count})"
+
+#, fuzzy
+msgid "Name"
+msgstr "Namn"
+
+#, fuzzy
+msgid "Name is required"
+msgstr "Namn måste anges"
+
+#, fuzzy
+msgid "New group"
+msgstr "Ny grupp"
+
+#, fuzzy
+msgid "New person"
+msgstr "Ny person"
+
+#, fuzzy
+msgid "No groups yet. Add one with the + button."
+msgstr "Inga grupper än. Lägg till en med +-knappen."
+
+#, fuzzy
+msgid "No persons yet. Add one with the + button."
+msgstr "Inga personer än. Lägg till en med +-knappen."
+
+#, fuzzy
+msgid "Not a member of any group"
+msgstr "Inte medlem i någon grupp"
+
+#, fuzzy
+msgid "Number of columns - {count}"
+msgstr "Antal kolumner - {count}"
+
+#, fuzzy
+msgid "Persons"
+msgstr "Personer"
+
+#, fuzzy
+msgid "Picture URL"
+msgstr "Bild-URL"
+
+#, fuzzy
+msgid "Profile picture of {name}"
+msgstr "Profilbild för {name}"
+
+#, fuzzy
+msgid "Profile: {name}"
+msgstr "Profil: {name}"
+
+#, fuzzy
+msgid "Save"
+msgstr "Spara"
+
+#, fuzzy
+msgid "Seed"
+msgstr "Seed"
+
+#, fuzzy
+msgid "Seed copied"
+msgstr "Seed kopierad"
+
+#, fuzzy
+msgid "Seed used:"
+msgstr "Använd seed:"
+
+#, fuzzy
+msgid "Settings"
+msgstr "Inställningar"
+
+#, fuzzy
+msgid "Shuffle"
+msgstr "Blanda"
+
+#, fuzzy
+msgid "Something went wrong: {message}"
+msgstr "Något gick fel: {message}"
+
+#, fuzzy
+msgid "Stop Shuffle"
+msgstr "Stoppa blandning"
+
+#, fuzzy
+msgid "The persons in the group are kept."
+msgstr "Personerna i gruppen finns kvar."
+
+#, fuzzy
+msgid "The same seed and the same persons always give the same result."
+msgstr "Samma seed och samma personer ger alltid samma resultat."
+
+#, fuzzy
+msgid "Use this seed"
+msgstr "Använd denna seed"
+
+#, fuzzy
+msgid "gives to"
+msgstr "ger till"
+
+#, fuzzy
+msgid "{count} persons"
+msgstr "{count} personer"
+
+#, fuzzy
+msgid "{name} will also be removed from all groups."
+msgstr "{name} tas även bort från alla grupper."
