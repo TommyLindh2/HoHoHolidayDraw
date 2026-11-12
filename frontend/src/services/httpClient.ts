@@ -10,14 +10,15 @@ export class HttpClient {
             params?: Record<string, string>;
             headers?: Record<string, string>;
         },
-        jsonData?: any
+        jsonData?: unknown
     ): Promise<Response> => {
         return fetch(this.buildUrl(uri, options?.params), {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
+                ...options?.headers,
             },
-            body: jsonData ? JSON.stringify(jsonData) : undefined,
+            body: jsonData !== undefined ? JSON.stringify(jsonData) : undefined,
         });
     };
 

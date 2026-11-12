@@ -1,4 +1,5 @@
 import { Component, h } from '@stencil/core';
+import { t } from '../../i18n';
 
 @Component({
     tag: 'app-tabs',
@@ -18,11 +19,11 @@ export class AppTabs {
                 <ion-tab-bar slot="bottom">
                     <ion-tab-button tab="tab-draw">
                         <ion-icon name="shuffle-outline"></ion-icon>
-                        <ion-label>Draw</ion-label>
+                        <ion-label>{t('Draw')}</ion-label>
                     </ion-tab-button>
                     <ion-tab-button tab="tab-person">
                         <ion-icon name="people-outline"></ion-icon>
-                        <ion-label>Person</ion-label>
+                        <ion-label>{t('Persons')}</ion-label>
                     </ion-tab-button>
                 </ion-tab-bar>
             </ion-tabs>
