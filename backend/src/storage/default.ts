@@ -1,9 +1,9 @@
 import { DbStorage } from "./interface";
 import * as models from "../models";
 
-export function InitializeDefaultPersons(storage: DbStorage) {
+export function InitializeDefaultPersons(storage: DbStorage): void {
     const profilesPrefix = "/assets/profiles/";
-    const persons: Partial<models.Person>[] = [
+    const personInputs: models.PersonInput[] = [
         {
             name: "Tommy",
             pictureUrl: profilesPrefix + "tommy.jpg",
@@ -80,12 +80,10 @@ export function InitializeDefaultPersons(storage: DbStorage) {
         },
     ];
 
-    for (let i = 0; i < persons.length; i++) {
-        persons[i] = storage.CreatePerson(persons[i] as models.Person);
-    }
+    const persons = personInputs.map((input) => storage.CreatePerson(input));
+    const idByName = new Map(persons.map((p) => [p.name, p.id]));
 
-    type GroupWithPersons = Partial<models.Group> & { persons?: string[] };
-    const groups: Array<GroupWithPersons> = [
+    const groups: { name: string; persons: string[] }[] = [
         {
             name: "Lindharna",
             persons: [
@@ -134,19 +132,13 @@ export function InitializeDefaultPersons(storage: DbStorage) {
         },
     ];
 
-    for (let i = 0; i < groups.length; i++) {
-        const group = groups[i] as GroupWithPersons;
-        const groupBelongings = group?.persons ?? [];
-        delete group.persons;
-
-        const createdGroup = storage.CreateGroup(group);
-        groups[i] = createdGroup;
-
-        storage.AddPersonsToGroup(
-            createdGroup.id,
-            groupBelongings.map(
-                (name) => persons.find((p) => p.name == name)?.id ?? -1
-            )
-        );
+    for (const group of groups) {
+        storage.CreateGroup({
+            name: group.name,
+            personIds: group.persons.flatMap((name) => {
+                const id = idByName.get(name);
+                return id === undefined ? [] : [id];
+            }),
+        });
     }
 }
