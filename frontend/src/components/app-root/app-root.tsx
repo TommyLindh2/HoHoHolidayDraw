@@ -1,4 +1,5 @@
 import { Component, h } from '@stencil/core';
+import { loadTranslations } from '../../i18n';
 
 @Component({
     tag: 'app-root',
@@ -6,6 +7,11 @@ import { Component, h } from '@stencil/core';
     // shadow: true,
 })
 export class AppRoot {
+    /** Translations must be in place before any page renders. */
+    public componentWillLoad(): Promise<void> {
+        return loadTranslations();
+    }
+
     render() {
         return (
             <ion-app>
