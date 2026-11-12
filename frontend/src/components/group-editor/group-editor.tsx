@@ -3,6 +3,7 @@ import {
     CheckboxCustomEvent,
     InputCustomEvent,
     modalController,
+    SelectCustomEvent,
 } from '@ionic/core';
 import * as models from '../../models';
 import { BackendClient } from '../../services/backendClient';
@@ -20,6 +21,7 @@ export class GroupEditor {
 
     @State() private name = '';
     @State() private selectedIds: readonly number[] = [];
+    @State() private exclusions: readonly models.Exclusion[] = [];
     @State() private persons: models.Person[] = [];
     @State() private isLoading = true;
     @State() private isSaving = false;
@@ -32,6 +34,7 @@ export class GroupEditor {
     public async componentWillLoad(): Promise<void> {
         this.name = this.group?.name ?? '';
         this.selectedIds = this.group?.personIds ?? [];
+        this.exclusions = this.group?.exclusions ?? [];
         try {
             this.persons = await this.client.GetPersons();
         } catch (error) {
@@ -44,6 +47,27 @@ export class GroupEditor {
     private toggle = (personId: number, checked: boolean): void => {
         const others = this.selectedIds.filter(id => id !== personId);
         this.selectedIds = checked ? [...others, personId] : others;
+        if (!checked) {
+            // Exclusions only make sense between members.
+            this.exclusions = this.exclusions.filter(
+                e => e.giverId !== personId && e.receiverId !== personId
+            );
+        }
+    };
+
+    private excludedFor = (giverId: number): number[] =>
+        this.exclusions
+            .filter(e => e.giverId === giverId)
+            .map(e => e.receiverId);
+
+    private setExcluded = (
+        giverId: number,
+        receiverIds: readonly number[]
+    ): void => {
+        this.exclusions = [
+            ...this.exclusions.filter(e => e.giverId !== giverId),
+            ...receiverIds.map(receiverId => ({ giverId, receiverId })),
+        ];
     };
 
     private save = async (event?: Event): Promise<void> => {
@@ -57,7 +81,11 @@ export class GroupEditor {
         this.isSaving = true;
         this.error = null;
         try {
-            const input = { name, personIds: this.selectedIds };
+            const input = {
+                name,
+                personIds: this.selectedIds,
+                exclusions: this.exclusions,
+            };
             const saved = this.group
                 ? await this.client.UpdateGroup(this.group.id, input)
                 : await this.client.CreateGroup(input);
@@ -121,6 +149,7 @@ export class GroupEditor {
                         <input type="submit" hidden />
                     </form>
                     {this.renderMembers()}
+                    {this.renderExclusions()}
                 </ion-content>
             </Fragment>
         );
@@ -159,6 +188,60 @@ export class GroupEditor {
                         >
                             {person.name}
                         </ion-checkbox>
+                    </ion-item>
+                ))}
+            </ion-list>
+        );
+    };
+
+    private renderExclusions = () => {
+        const members = this.persons.filter(p =>
+            this.selectedIds.includes(p.id)
+        );
+        if (this.isLoading || members.length < 2) {
+            return;
+        }
+
+        return (
+            <ion-list>
+                <ion-list-header>
+                    <ion-label>
+                        <h2>{t('Exclusions')}</h2>
+                        <p>{t("Choose who each person won't give to in this group.")}</p>
+                    </ion-label>
+                </ion-list-header>
+                {members.map(giver => (
+                    <ion-item key={giver.id}>
+                        <ion-avatar slot="start">
+                            <img
+                                alt={t('Profile picture of {name}', {
+                                    name: giver.name,
+                                })}
+                                src={giver.pictureUrl || DEFAULT_PROFILE_PICTURE}
+                            />
+                        </ion-avatar>
+                        <ion-select
+                            label={t("{name} won't give to", {
+                                name: giver.name,
+                            })}
+                            labelPlacement="stacked"
+                            placeholder={t('Nobody')}
+                            multiple
+                            okText={t('OK')}
+                            cancelText={t('Cancel')}
+                            value={this.excludedFor(giver.id)}
+                            onIonChange={(event: SelectCustomEvent<number[]>) =>
+                                this.setExcluded(giver.id, event.detail.value ?? [])
+                            }
+                        >
+                            {members
+                                .filter(receiver => receiver.id !== giver.id)
+                                .map(receiver => (
+                                    <ion-select-option value={receiver.id}>
+                                        {receiver.name}
+                                    </ion-select-option>
+                                ))}
+                        </ion-select>
                     </ion-item>
                 ))}
             </ion-list>

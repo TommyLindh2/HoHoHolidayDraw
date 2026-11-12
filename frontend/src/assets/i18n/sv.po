@@ -155,8 +155,8 @@ msgid "The persons in the group are kept."
 msgstr "Personerna i gruppen finns kvar."
 
 #, fuzzy
-msgid "The same seed and the same persons always give the same result."
-msgstr "Samma seed och samma personer ger alltid samma resultat."
+msgid "The same seed, persons and exclusions always give the same result."
+msgstr "Samma seed, personer och undantag ger alltid samma resultat."
 
 #, fuzzy
 msgid "Use this seed"
@@ -173,3 +173,27 @@ msgstr "{count} personer"
 #, fuzzy
 msgid "{name} will also be removed from all groups."
 msgstr "{name} tas även bort från alla grupper."
+
+#, fuzzy
+msgid "No valid draw is possible with these exclusions. Remove some and try again."
+msgstr "Ingen giltig dragning är möjlig med dessa undantag. Ta bort några och försök igen."
+
+#, fuzzy
+msgid "Choose who each person won't give to in this group."
+msgstr "Välj vem varje person inte ska ge till i den här gruppen."
+
+#, fuzzy
+msgid "Exclusions"
+msgstr "Undantag"
+
+#, fuzzy
+msgid "Nobody"
+msgstr "Ingen"
+
+#, fuzzy
+msgid "OK"
+msgstr "OK"
+
+#, fuzzy
+msgid "{name} won't give to"
+msgstr "{name} ger inte till"

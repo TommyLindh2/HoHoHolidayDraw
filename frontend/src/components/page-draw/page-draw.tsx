@@ -5,6 +5,7 @@ import { DEFAULT_PROFILE_PICTURE } from '../../config';
 import { t } from '../../i18n';
 import { decoyShuffle, revealRow } from '../../utils/shuffle';
 import { showError, showToast } from '../../utils/ui';
+import { ResponseError } from '../../errors';
 import {
     AccordionGroupChangeEventDetail,
     InputCustomEvent,
@@ -331,7 +332,7 @@ export class PageDraw {
                     labelPlacement="stacked"
                     placeholder={t('Leave empty for a random draw')}
                     helperText={t(
-                        'The same seed and the same persons always give the same result.'
+                        'The same seed, persons and exclusions always give the same result.'
                     )}
                     clearInput
                     maxlength={64}
@@ -474,7 +475,19 @@ export class PageDraw {
             );
         } catch (error) {
             this.isShuffling = false;
-            await showError(error);
+            if (
+                error instanceof ResponseError &&
+                error.code === 'draw_impossible'
+            ) {
+                await showToast(
+                    t(
+                        'No valid draw is possible with these exclusions. Remove some and try again.'
+                    ),
+                    'danger'
+                );
+            } else {
+                await showError(error);
+            }
             return;
         }
         if (run !== this.shuffleRun) {
