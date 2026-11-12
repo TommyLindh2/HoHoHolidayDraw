@@ -30,7 +30,7 @@ This project consists of two main components:
 -   [Node.js](https://nodejs.org/) - JavaScript runtime
 -   [Express.js](https://expressjs.com/) - Web framework
 -   TypeScript - Type-safe JavaScript
--   In-memory storage (with plans for database integration)
+-   JSON file storage (`backend/data/db.json`, created with default data on first start)
 
 ## 🚀 Getting Started
 
@@ -70,7 +70,7 @@ cd backend
 npm start
 ```
 
-The API server will start on `http://localhost:3000`
+The API server will start on `http://localhost:3001`
 
 #### Frontend Development Server
 
@@ -104,13 +104,26 @@ The built files will be available in the `www` directory.
 ### Persons
 
 -   `GET /api/person` - Get all persons
+-   `POST /api/person` - Create a person (`{ "name": "Anna", "pictureUrl": "/assets/profiles/anna.jpg" }`)
 -   `GET /api/person/:id` - Get person by ID
+-   `PUT /api/person/:id` - Update a person (send `"pictureUrl": null` to remove the picture)
+-   `DELETE /api/person/:id` - Delete a person (also removes them from all groups)
 
 ### Groups
 
 -   `GET /api/group` - Get all groups
+-   `POST /api/group` - Create a group (`{ "name": "Family", "personIds": [1, 2, 3] }`)
 -   `GET /api/group/:id` - Get group by ID
+-   `PUT /api/group/:id` - Update a group's name and/or members
+-   `DELETE /api/group/:id` - Delete a group (its persons are kept)
 -   `GET /api/group/:id/person` - Get all persons in a group
+-   `PUT /api/group/:id/person/:personId` - Add a person to a group
+-   `DELETE /api/group/:id/person/:personId` - Remove a person from a group
+
+### Draw
+
+-   `GET /api/group/:id/draw?seed=abc` - Draw who gives to whom. Returns `{ seed, assignments: [{ giverId, receiverId }] }`.
+    Leave out `seed` to get a random one. **The same seed on the same group members always gives the same result**, so a draw can be repeated or checked afterwards.
 
 ## 🎨 Usage
 
@@ -118,7 +131,7 @@ The built files will be available in the `www` directory.
 2. **View Groups**: Browse available groups from the group list
 3. **Select a Group**: Choose a group to start a gift exchange draw
 4. **Customize Settings**: Adjust animation speed, count, and layout columns
-5. **Start the Draw**: Click "Shuffle" to begin the animated gift assignment process
+5. **Start the Draw**: Click "Shuffle" to begin the animated gift assignment process. Enter a seed first to repeat an earlier draw; the seed that was used is shown after each draw
 6. **View Results**: Watch as the animation reveals who gives gifts to whom
 
 ## 🗂️ Project Structure
@@ -131,8 +144,10 @@ HoHoHolidayDraw/
 │   ├── tsconfig.json
 │   └── src/
 │       ├── app.ts          # Express application setup
-│       ├── models/         # Data models (Person, Group)
-│       ├── storage/        # Data storage layer
+│       ├── models/         # Data models (Person, Group, DrawResult)
+│       ├── routes/         # API routes
+│       ├── draw/           # Seeded draw logic
+│       ├── storage/        # Memory + JSON file storage
 │       └── errors/         # Error handling
 └── frontend/               # Ionic + Stencil application
     ├── package.json
@@ -152,11 +167,14 @@ HoHoHolidayDraw/
 
 The backend server can be configured using environment variables:
 
--   `PORT` - Server port (default: 3000)
+-   `PORT` - Server port (default: 3001)
+-   `DATA_FILE` - Path to the JSON storage file (default: `backend/data/db.json`). Delete the file to reset to the default data.
 
 ### Frontend Configuration
 
 Frontend configuration is handled in `src/config.ts` and `stencil.config.ts`.
+
+Texts are translated with `.po` files in `frontend/src/assets/i18n/`. The language follows the browser; override it with `localStorage.setItem('lang', 'sv')` (or `'en'`).
 
 ## 🚢 Deployment
 
@@ -184,17 +202,19 @@ Deploy the backend to any Node.js hosting platform. Ensure to:
 
 ### Frontend Improvements
 
--   [ ] Add/update/delete functionality for groups and persons
--   [ ] Prevent endless loops when shuffling
+-   [x] Add/update/delete functionality for groups and persons
+-   [x] Prevent endless loops when shuffling
+-   [x] Seeded, repeatable draws
 -   [ ] Enhanced mobile responsiveness
 -   [ ] Offline support with service workers
 
 ### Backend Improvements
 
+-   [x] File storage
 -   [ ] Database integration (PostgreSQL/MongoDB)
--   [ ] DELETE endpoints for data management
+-   [x] DELETE endpoints for data management
 -   [ ] User authentication and authorization
--   [ ] Data validation and sanitization
+-   [x] Data validation
 -   [ ] API rate limiting
 
 ## 🤝 Contributing
