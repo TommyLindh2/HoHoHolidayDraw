@@ -1,9 +1,12 @@
 import { Router } from "express";
+import { drawAssignments, generateSeed } from "../draw";
+import { DrawResult } from "../models";
 import { DbStorage } from "../storage";
 import {
     parseGroupInput,
     parseGroupUpdate,
     parseId,
+    parseSeed,
 } from "../validation";
 
 export function groupRouter(storage: DbStorage): Router {
@@ -53,6 +56,20 @@ export function groupRouter(storage: DbStorage): Router {
                 parseId(req.params.personId, "person ID")
             )
         );
+    });
+
+    /**
+     * GET /api/group/:id/draw?seed=abc
+     * Same seed + same members = same result. Omit the seed to get a new one.
+     */
+    router.get("/:id/draw", (req, res) => {
+        const group = storage.GetGroupById(parseId(req.params.id));
+        const seed = parseSeed(req.query.seed) ?? generateSeed();
+        const result: DrawResult = {
+            seed,
+            assignments: drawAssignments(group.personIds, seed),
+        };
+        res.json(result);
     });
 
     return router;
