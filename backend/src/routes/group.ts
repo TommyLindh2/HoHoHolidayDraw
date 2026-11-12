@@ -60,14 +60,22 @@ export function groupRouter(storage: DbStorage): Router {
 
     /**
      * GET /api/group/:id/draw?seed=abc
-     * Same seed + same members = same result. Omit the seed to get a new one.
+     * Same seed + same members + same exclusions = same result.
+     * Omit the seed to get a new one.
      */
     router.get("/:id/draw", (req, res) => {
         const group = storage.GetGroupById(parseId(req.params.id));
         const seed = parseSeed(req.query.seed) ?? generateSeed();
+        const exclusions = new Map<number, number[]>();
+        for (const { giverId, receiverId } of group.exclusions) {
+            exclusions.set(giverId, [
+                ...(exclusions.get(giverId) ?? []),
+                receiverId,
+            ]);
+        }
         const result: DrawResult = {
             seed,
-            assignments: drawAssignments(group.personIds, seed),
+            assignments: drawAssignments(group.personIds, seed, exclusions),
         };
         res.json(result);
     });

@@ -1,5 +1,6 @@
-import { NotFoundError } from "../errors";
+import { NotFoundError, ValidationError } from "../errors";
 import {
+    Exclusion,
     Group,
     GroupInput,
     GroupUpdate,
@@ -26,6 +27,14 @@ export class MemoryStorage implements DbStorage {
 
     constructor(initialData: StorageData = emptyStorageData()) {
         this.data = initialData;
+        // Files written by older versions have no group exclusions.
+        for (const group of this.data.groups) {
+            group.exclusions ??= [];
+        }
+        // Exclusions used to be stored per person.
+        for (const person of this.data.persons) {
+            delete (person as Person & { excludedIds?: unknown }).excludedIds;
+        }
     }
 
     /** Called after every mutation. Override to persist the data. */
@@ -55,6 +64,35 @@ export class MemoryStorage implements DbStorage {
         const unique = [...new Set(personIds)];
         unique.forEach((id) => this.findPerson(id));
         return unique;
+    }
+
+    /** Rejects exclusions that don't make sense, and drops duplicates. */
+    private validExclusions(
+        personIds: readonly number[],
+        exclusions: readonly Exclusion[]
+    ): Exclusion[] {
+        const unique = new Map<string, Exclusion>();
+        for (const { giverId, receiverId } of exclusions) {
+            if (giverId === receiverId) {
+                throw new ValidationError("A person can't exclude themselves");
+            }
+            if (!personIds.includes(giverId) || !personIds.includes(receiverId)) {
+                throw new ValidationError(
+                    "Exclusions can only refer to members of the group"
+                );
+            }
+            unique.set(`${giverId}:${receiverId}`, { giverId, receiverId });
+        }
+        return [...unique.values()];
+    }
+
+    /** Drops exclusions that refer to persons no longer in the group. */
+    private pruneExclusions(group: Group): void {
+        group.exclusions = group.exclusions.filter(
+            ({ giverId, receiverId }) =>
+                group.personIds.includes(giverId) &&
+                group.personIds.includes(receiverId)
+        );
     }
 
     public GetPersons(): Person[] {
@@ -94,6 +132,7 @@ export class MemoryStorage implements DbStorage {
         this.data.persons = this.data.persons.filter((p) => p.id !== personId);
         for (const group of this.data.groups) {
             group.personIds = group.personIds.filter((id) => id !== personId);
+            this.pruneExclusions(group);
         }
         this.persist();
     }
@@ -107,10 +146,12 @@ export class MemoryStorage implements DbStorage {
     }
 
     public CreateGroup(input: GroupInput): Group {
+        const personIds = this.uniqueExistingPersonIds(input.personIds);
         const group: Group = {
             id: this.nextId(),
             name: input.name,
-            personIds: this.uniqueExistingPersonIds(input.personIds),
+            personIds,
+            exclusions: this.validExclusions(personIds, input.exclusions ?? []),
         };
         this.data.groups.push(group);
         this.persist();
@@ -119,8 +160,21 @@ export class MemoryStorage implements DbStorage {
 
     public UpdateGroup(groupId: number, update: GroupUpdate): Group {
         const group = this.findGroup(groupId);
-        if (update.personIds !== undefined) {
-            group.personIds = this.uniqueExistingPersonIds(update.personIds);
+        const personIds =
+            update.personIds !== undefined
+                ? this.uniqueExistingPersonIds(update.personIds)
+                : group.personIds;
+        // Validate before changing anything, so a bad request changes nothing.
+        const exclusions =
+            update.exclusions !== undefined
+                ? this.validExclusions(personIds, update.exclusions)
+                : undefined;
+
+        group.personIds = personIds;
+        if (exclusions) {
+            group.exclusions = exclusions;
+        } else {
+            this.pruneExclusions(group);
         }
         if (update.name !== undefined) {
             group.name = update.name;
@@ -156,6 +210,7 @@ export class MemoryStorage implements DbStorage {
         const group = this.findGroup(groupId);
         this.findPerson(personId);
         group.personIds = group.personIds.filter((id) => id !== personId);
+        this.pruneExclusions(group);
         this.persist();
         return structuredClone(group);
     }

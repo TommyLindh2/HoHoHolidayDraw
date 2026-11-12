@@ -28,7 +28,10 @@ export function createApp(storage: DbStorage): Express {
                 return;
             }
             if (err instanceof errors.ValidationError) {
-                res.status(400).json({ error: err.message });
+                res.status(400).json({
+                    error: err.message,
+                    ...(err.code ? { code: err.code } : {}),
+                });
                 return;
             }
             if (isJsonParseError(err)) {

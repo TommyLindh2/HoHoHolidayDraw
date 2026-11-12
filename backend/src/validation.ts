@@ -1,5 +1,11 @@
 import { ValidationError } from "./errors";
-import { GroupInput, GroupUpdate, PersonInput, PersonUpdate } from "./models";
+import {
+    Exclusion,
+    GroupInput,
+    GroupUpdate,
+    PersonInput,
+    PersonUpdate,
+} from "./models";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_URL_LENGTH = 2000;
@@ -46,11 +52,11 @@ function parsePictureUrl(value: unknown): string | null {
     return value.trim() || null;
 }
 
+const isId = (value: unknown): value is number =>
+    Number.isInteger(value) && (value as number) > 0;
+
 function parsePersonIds(value: unknown): number[] {
-    if (
-        !Array.isArray(value) ||
-        !value.every((id) => Number.isInteger(id) && id > 0)
-    ) {
+    if (!Array.isArray(value) || !value.every(isId)) {
         throw new ValidationError("personIds must be an array of person IDs");
     }
     return value as number[];
@@ -79,13 +85,32 @@ export function parsePersonUpdate(raw: unknown): PersonUpdate {
     return update;
 }
 
+function parseExclusions(value: unknown): Exclusion[] {
+    const isExclusion = (item: unknown): boolean =>
+        typeof item === "object" &&
+        item !== null &&
+        isId((item as Body).giverId) &&
+        isId((item as Body).receiverId);
+
+    if (!Array.isArray(value) || !value.every(isExclusion)) {
+        throw new ValidationError(
+            "exclusions must be an array of { giverId, receiverId }"
+        );
+    }
+    return value.map(({ giverId, receiverId }) => ({ giverId, receiverId }));
+}
+
 export function parseGroupInput(raw: unknown): GroupInput {
     const body = asBody(raw);
-    return {
+    const input: GroupInput = {
         name: parseName(body.name),
         personIds:
             body.personIds === undefined ? [] : parsePersonIds(body.personIds),
     };
+    if (body.exclusions !== undefined) {
+        input.exclusions = parseExclusions(body.exclusions);
+    }
+    return input;
 }
 
 export function parseGroupUpdate(raw: unknown): GroupUpdate {
@@ -96,6 +121,9 @@ export function parseGroupUpdate(raw: unknown): GroupUpdate {
     }
     if (body.personIds !== undefined) {
         update.personIds = parsePersonIds(body.personIds);
+    }
+    if (body.exclusions !== undefined) {
+        update.exclusions = parseExclusions(body.exclusions);
     }
     return update;
 }
