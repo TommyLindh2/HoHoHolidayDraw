@@ -112,9 +112,9 @@ The built files will be available in the `www` directory.
 ### Groups
 
 -   `GET /api/group` - Get all groups
--   `POST /api/group` - Create a group (`{ "name": "Family", "personIds": [1, 2, 3] }`)
+-   `POST /api/group` - Create a group (`{ "name": "Family", "personIds": [1, 2, 3], "exclusions": [{ "giverId": 1, "receiverId": 2 }] }`). An exclusion means the giver must never give to the receiver in this group.
 -   `GET /api/group/:id` - Get group by ID
--   `PUT /api/group/:id` - Update a group's name and/or members
+-   `PUT /api/group/:id` - Update a group's name, members and/or exclusions (exclusions for removed members are dropped)
 -   `DELETE /api/group/:id` - Delete a group (its persons are kept)
 -   `GET /api/group/:id/person` - Get all persons in a group
 -   `PUT /api/group/:id/person/:personId` - Add a person to a group
@@ -123,7 +123,8 @@ The built files will be available in the `www` directory.
 ### Draw
 
 -   `GET /api/group/:id/draw?seed=abc` - Draw who gives to whom. Returns `{ seed, assignments: [{ giverId, receiverId }] }`.
-    Leave out `seed` to get a random one. **The same seed on the same group members always gives the same result**, so a draw can be repeated or checked afterwards.
+    Leave out `seed` to get a random one. **The same seed on the same group members (and exclusions) always gives the same result**, so a draw can be repeated or checked afterwards.
+    Nobody gives to themselves or to anyone the group's exclusions forbid. If the exclusions make a draw impossible, the response is a 400 with `"code": "draw_impossible"`.
 
 ## 🎨 Usage
 
