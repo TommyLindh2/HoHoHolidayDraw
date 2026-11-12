@@ -33,6 +33,20 @@ test("rejects invalid input and unknown members with useful status codes", async
         (await send("POST", "group", { name: "G", personIds: [999] })).status,
         404
     );
+    // Exclusions must be between members of the group.
+    const anna = await json<Person>(send("POST", "person", { name: "Anna" }));
+    const bo = await json<Person>(send("POST", "person", { name: "Bo" }));
+    const outsider = { giverId: anna.id, receiverId: 999 };
+    assert.equal(
+        (
+            await send("POST", "group", {
+                name: "G",
+                personIds: [anna.id, bo.id],
+                exclusions: [outsider],
+            })
+        ).status,
+        400
+    );
 });
 
 test("draw endpoint returns its seed and repeats the draw for that seed", async () => {
