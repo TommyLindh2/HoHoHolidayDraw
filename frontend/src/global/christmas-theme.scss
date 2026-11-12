@@ -79,3 +79,13 @@ body {
 ion-tab-bar {
     --ion-tab-bar-background: var(--ion-color-primary-contrast, #fff);
 }
+
+// The transparent page background above would leak into overlays and make
+// them unreadable, so give dialogs, popovers and pickers a solid background.
+ion-modal,
+ion-popover,
+ion-alert,
+ion-action-sheet,
+ion-select-popover {
+    --ion-background-color: #ffffff;
+}
